@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -exu
+
+## loading .environment variables if exist
+if [ -f .env ]; then . .env; fi
+if [ -f ../.env ]; then . ../.env; fi
+
+echo "Make sure you're running this command in a Docker Swarm environment";
+docker stack deploy

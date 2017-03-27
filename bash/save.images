@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -exu
+
+## loading .environment variables if exist
+if [ -f .env ]; then . .env; fi
+if [ -f ../.env ]; then . ../.env; fi
+
+## get all running containers
+## filter by projectname
+
+echo "$PROJECT_NAME"

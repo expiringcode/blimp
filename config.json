@@ -1,0 +1,79 @@
+{
+    "GLOBALS": {
+        "project_name": "test",
+        "version": 1,
+        "DOCKER": 1,
+        "TZ": "Europe/Rome",
+        "ports": {
+            "dev": {
+                "http_port": 8880,
+                "https_port": 8443,
+                "database_port": 8836
+            },
+            "prod": {
+                "http_port": 80,
+                "https_port": 443,
+                "database_port": 3306
+            }
+        }
+    },
+    "php": {
+        "dev": {
+            "DEVELOPMENT": "1",
+            "WORKDIR": "/www",
+            "WP_USE_THEMES": false,
+            "WP_LANG": "it_IT",
+            "WP_POST_REVISIONS": "false",
+            "APP_ID": "aeriawork",
+            "ENV": "local",
+            "HOSTNAME": "localhost",
+            "PUBLIC_URL": "http://aeriawork.vanadio.dev"
+        },
+        "prod": {
+            "DEVELOPMENT": "1",
+            "WORKDIR": "/www",
+            "WP_USE_THEMES": false,
+            "WP_LANG": "it_IT",
+            "WP_POST_REVISIONS": "false",
+            "APP_ID": "aeriawork",
+            "ENV": "local",
+            "HOSTNAME": "localhost",
+            "PUBLIC_URL": "http://aeriawork.vanadio.dev"
+        }
+    },
+    "nginx": {
+        "dev": {
+            "WORKDIR": "/www",
+            "ENVIRONMENT": "DEVELOPMENT",
+            "DOMAIN": "localhost"
+        },
+        "prod": {
+            "WORKDIR": "/www",
+            "ENVIRONMENT": "PRODUCTION",
+            "DOMAIN": "localhost"
+        }
+    },
+    "mysql": {
+        "dev": {
+            "MYSQL_ROOT_PASSWORD": "root_password",
+            "MYSQL_ALLOW_EMPTY_PASSWORD": "yes",
+            "MYSQL_DATABASE": "test",
+            "MYSQL_USER": "root",
+            "MYSQL_PASSWORD": "admin",
+            "DB_HOST": "mysql",
+            "DB_NAME": "test",
+            "DB_USER": "root",
+            "DB_PASS": "admin"
+        },
+        "prod": {
+            "MYSQL_RANDOM_ROOT_PASSWORD": "yes",
+            "MYSQL_DATABASE": "test",
+            "MYSQL_USER": "root",
+            "MYSQL_PASSWORD": "admin",
+            "DB_HOST": "mysql",
+            "DB_NAME": "test",
+            "DB_USER": "root",
+            "DB_PASS": "admin"
+        }
+    }
+}

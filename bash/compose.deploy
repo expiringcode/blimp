@@ -1,0 +1,23 @@
+#!/bin/bash
+
+set -exu
+
+## loading .environment variables if exist
+if [ -f .env ]; then . .env; fi
+if [ -f ../.env ]; then . ../.env; fi
+
+## info
+echo "\n For better understanding check https://docs.docker.com/machine/overview/"
+echo "\n"
+
+if [ -z $DOCKER_HOST -o -z $DOCKER_TLS_VERIFY -o -z $DOCKER_CERT_PATH ]; then
+	echo "Please set DOCKER_HOST, DOCKER_TLS_VERIFY, DOCKER_CERT_PATH"
+	echo "if you want to deploy to a remote server"
+fi
+
+if [ ! -z $1 ]; then
+	docker-compose build $1
+	docker-compose up --no-deps -d $1
+else
+	echo "Please enter the name of the service you want to deploy"
+fi

@@ -1,0 +1,20 @@
+#!/bin/bash
+
+set -exu
+
+## loading .environment variables if exist
+if [ -f .env ]; then . .env; fi
+if [ -f ../.env ]; then . ../.env; fi
+	
+echo "-----------------------------------------------"
+echo "Careful! This command is to be used only on" 
+echo "development environments"
+echo "-----------------------------------------------"
+echo "It will delete all docker networks and volumes"
+echo "along with all orphan containers"
+echo "\n\n"
+
+docker-compose down --remove-orphans
+
+docker network prune -f
+docker volume prune -f

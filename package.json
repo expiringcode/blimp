@@ -1,0 +1,54 @@
+{
+  "name": "containers",
+  "version": "1.0.0",
+  "description": "Docker web framework initializer",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/caffeinalab/docker-webdev-env.git"
+  },
+  "keywords": [
+    "docker",
+    "web"
+  ],
+  "scripts": {
+    "hint": "jshint framework --exclude framework/ext",
+    "gendoc": "./gendoc.sh",
+    "patch": "./publisher.sh patch",
+    "minor": "./publisher.sh minor",
+    "major": "./publisher.sh major"
+  },
+  "bin": {
+    "dockerize": "./index.js"
+  },
+  "author": "Ani Sinanaj",
+  "license": "MIT",
+  "bugs": {
+    "type": "git",
+    "url": "https://github.com/caffeinalab/docker-webdev-env/issues"
+  },
+  "homepage": "https://github.com/caffeinalab/docker-webdev-env#readme",
+  "preferGlobal": true,
+  "dependencies": {
+    "async": "^2.1.4",
+    "gm": "^1.23.0",
+    "image-size": "^0.5.0",
+    "pem": "^1.9.4",
+    "request": "^2.79.0",
+    "uglifyjs": "^2.4.10",
+    "unzip": "^0.1.11",
+    "colors": "^1.0.3",
+    "commander": "^2.7.1",
+    "fs-extended": "^0.2.0",
+    "inquirer": "^0.12.0",
+    "prompt": "^0.3.0",
+    "q": "^1.5.0",
+    "underscore": "^1.8.3",
+    "underscore.string": "^3.3.4",
+    "universal-analytics": "^0.4.6",
+    "update-notifier": "^0.3.1"
+  }
+}
