@@ -11,14 +11,23 @@ const _ 			= require('underscore');
 const inquirer 		= require('inquirer');
 const prompt 		= require('prompt');
 const child_process	= require('child_process');
+const escape 		= require("shell-escape");
+const env 			= require('node-env-file');
 const fs			= require('fs-extended');
 const Q				= require('q');
 const exec 			= child_process.exec;
 const containers 	= "https://github.com/caffeinalab/docker-webdev-env";
 
-var log = (err, stdout, stderr) => {
-	console.log(err, stdout, stderr);
-	if (err) error(err);
+const execOpts 		= { cwd: CWD, stdio:[0,1,2] }; //stdio is only needed for execSync
+reqEnvOrExit();
+
+// Helpers
+
+const log = (err, stdout, stderr) => {
+	if (err) error(err, 1, true);
+
+	if (stderr != null && stderr != "") process.stdout.write(`${stderr}\n`.yellow);
+	if (stdout != null && stdout != "") process.stdout.write(`${stdout}\n`.blue);
 };
 
 function getUserHome() {
@@ -35,13 +44,26 @@ function error(msg, code, dont_exit) {
 }
 
 function reqEnvOrExit(){
-	if (!fs.existsSync('.env')) {
-		process.stdout.write('.env file is missing. Generate it with `gen env`');
+	if (!fs.existsSync(CWD + '/.env') && !fs.existsSync(CWD + '/yml/.env')) {
+		process.stdout.write('.env file is missing.\n\n'.red);
+		if (fs.existsSync(CWD + '/.env.sample')) {
+			env(CWD + '/.env.sample');
+		}
+	} 
+
+	if (fs.existsSync(CWD + '/.env')) {
+		env(CWD + '/.env');
+	}
+
+	if (fs.existsSync(CWD + "/yml/.env")) {
+		env(CWD + '/yml/.env', {overwrite: true});
 	}
 }
 
+// Git
+
 function gitCleanOrExit() {
-	var out = exec('git status --porcelain').output || '';
+	var out = exec('git status --porcelain', execOpts).output || '';
 	var lines = (out.match(/\n/g) || []).length;
 	if (lines > 0) {
 		process.stdout.write('Current working directory is not clean. Please commit current changes before doing anything');
@@ -50,61 +72,172 @@ function gitCleanOrExit() {
 
 function gitTag(version) {
 	process.stdout.write("Tagging current changes...");
-	exec('git tag -d "' + version + '"');
-	exec('git tag "' + version + '" && git push --tags');
+	exec('git tag -d "' + version + '"', execOpts);
+	exec('git tag "' + version + '" && git push --tags', execOpts);
 }
 
 function gitCommit(message) {
 	process.stdout.write("Commiting current changes...");
-	exec('git add -A && git commit -am "' + message + '" && git push');
+	exec('git add -A && git commit -am "' + message + '" && git push', execOpts);
+}
+
+function gitClone(dir, callback) {
+	if (_.isFunction(dir) && !callback) {
+		callback = dir;
+		dir = ".";
+	}
+
+	let cmd = ['git','clone', containers, dir].join(" ");
+	process.stdout.write("Cloning docker infrastructure...\n".green);
+	exec(cmd, execOpts, callback);
+}
+
+function gitRemoveRemote(dir, callback) {
+	if (_.isFunction(dir) && !callback) {
+		callback = dir;
+		dir = ".";
+	}
+
+	let cmd = ['rm','-rf', dir + "/.git"].join(" ");
+	process.stdout.write("Resetting git...\n".green);
+	exec(cmd, execOpts, callback);
+}
+
+// Dockerize
+
+// Create
+
+function create(name) {
+	var self = this;
+	if (!_.isString(name)) {
+		process.stdout.write("Please provide a name for your project\n".red);
+		return false;
+	}
+	
+	createProject(name)
+	.then(removeOrigin)
+	.then(cleanFiles)
+	.then(function() {
+		console.log("Project cloned.\n".green);
+	})
+	.catch(function(e, stderr) {
+		if (_.isString(e)) console.log(e.red);
+		else console.log(e);
+	});
 }
 
 function createProject(name) {
 	return Q.promise(function(resolve, reject) {
-
 		if (fs.existsSync(name)) {
 			return reject("A folder named <" + name + "> already exists");
 		}
 
 		process.stdout.write("Creating new project ".green + name +  "\n".green);
-		let cmd = ['git','clone', containers, name].join(" ");
-		exec(cmd, (err, stdout, stderr) => {
-			if (err) return reject(err, stderr)
+		
+		gitClone(name, (err, stdout, stderr) => {
+			if (err) return reject(err, stderr);
+			log(false, stdout, stderr);
+			
+			resolve(name);
+		});
+	});
+}
+
+function removeOrigin(name) {
+	return Q.promise(function(resolve, reject) {
+		gitRemoveRemote(name, (err, stdout, stderr) => {
+			if (err) return reject(err, stderr);
+			log(false, stdout, stderr);
+			
+			resolve(name);
+		});
+	});
+}
+
+function cleanFiles(name) {
+	return Q.promise(function(resolve, reject) {
+		let cmd = ["rm", "-rf", "*.png", ".gitignore", "*.md"].join(" ");
+		exec(cmd, _.extend(execOpts, {cwd: `${CWD}/${name}`}), (err, stdout, stderr) => {
+			if (err) return reject(err, stderr);
+			log(false, stdout, stderr);
+			
 			resolve(stdout, stderr);
 		});
 	});
 }
 
+// Build
+
+function build(type) {
+	var self = this;
+
+	process.stdout.write("Building docker for the specified environment".green);
+
+	if (!self.type) {
+		error("Please provide build environment [dev|prod]");
+	}
+
+	let cmd = ["docker-compose","-f", "yml/docker-compose.yml"];
+	if (type == "dev") {
+		cmd.concat(["-f","yml/docker-compose.dev.yml", "up", "-d", "--build", "--remove-orphans"]);
+	} else if (type == "prod") {
+		cmd.concat(["up", "-d", "--build"]);
+	}
+
+	exec(cmd.join(" "), execOpts);
+}
+
+
 function selectServices() {
 	//prompt;
 }
 
-function build(type) {
-	process.stdout.write("Building docker for the specified environment".green);
-
-	var cmd = "docker-compose -f docker-compose.yml ";
-	if (type == "dev") {
-		cmd += "-f docker-compose.dev.yml up -d --build --remove-orphans";
-	} else if (type == "prod") {
-		cmd += "up -d --build";
-	}
-
-	exec(cmd);
+function configureBaseSchema() {
+	return Q.promise(function(resolve, reject) {
+		
+	});
 }
+
+// Clean
 
 function clean() {
-	process.stdout.write("Careful! This command is to be used only on development environments".yellow);
-	process.stdout.write("\nIt will delete all docker networks and volumes along with all orphan containers".red);
 
-	exec("docker network prune -f && docker volume prune -f");
+	process.stdout.write("Careful! This command is to be used only on development environments \n".yellow);
+	process.stdout.write("It will delete all docker networks and volumes along with all orphan containers\n".red);
+
+	exec("docker network prune -f && docker volume prune -f", execOpts, (err, stdout, stderr) => {
+		process.stdout.write(`${stderr} \n`.red);
+
+		exec("docker-compose down", _.extend(execOpts, {cwd: `${CWD}/yml`}), log);
+	});
 }
 
+// Load balancer
+
 function loadBalancer() {
+	var self = this;
+
+	if (self.rm) {
+		removeLoadBalancer();
+		return;
+	}
+
 	process.stdout.write("Creating main network and load balancer\n".green);
-	
-	exec("docker network ls", (error, stdout, stderr) => {
-		process.stdout.write(error, stdout, stderr);
+	exec("docker network ls", execOpts, (error, stdout, stderr) => {
+		process.stdout.write("Showing all networks: \n".yellow);
+		process.stdout.write(stdout.blue);
+		
+		if (stdout.indexOf("loadbalancer") != -1) {
+			process.stdout.write("Network already exists".green);
+		} else {
+			exec("docker-compose -f network/docker-compose.yml up -d --build", execOpts, log);
+		}
 	});
+}
+
+function removeLoadBalancer() {
+	process.stdout.write("Removing main network and load balancer\n".green);
+	exec("docker-compose down", _.extend(execOpts, {cwd: CWD + "/network"}) , log);
 }
 
 /////////////////////////
@@ -123,23 +256,7 @@ program
 program
 .command('create')
 .description('Initialize a new project')
-.action(function(name) {
-	var self = this;
-	if (!_.isString(name)) {
-		process.stdout.write("Please provide a name for your project\n".red);
-		return false;
-	}
-	createProject(name)
-	.then(function() {
-		process.chdir(CWD + "/" + name);
-		//console.log(process.cwd());
-		console.log("Project cloned.".green)
-	})
-	.catch(function(e, stderr) {
-		if (_.isString(e)) console.log(e.red)
-		else console.log(e);
-	})
-});
+.action(create);
 
 program
 .command('build')
@@ -152,11 +269,11 @@ program
 .action(clean);
 
 program
-.command('lb')
+.command('loadbalancer')
+.alias("lb")
+.option("-r, --rm", "Remove loadbalancer and network")
 .description('Create a load balancer and the main network where to attach all the projects')
 .action(loadBalancer);
-
-
 
 // Parse the input arguments
 program.parse(process.argv);
@@ -165,5 +282,5 @@ program.parse(process.argv);
 if (program.args.length === 0 || typeof program.args[program.args.length - 1] === 'string') {
 	program.help();
 } else {
-	
+
 }
