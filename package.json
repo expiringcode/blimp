@@ -32,6 +32,7 @@
   },
   "homepage": "https://github.com/caffeinalab/docker-webdev-env#readme",
   "preferGlobal": true,
+  "debug": true,
   "dependencies": {
     "async": "^2.1.4",
     "gm": "^1.23.0",

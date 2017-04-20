@@ -15,16 +15,19 @@ const escape 		= require("shell-escape");
 const env 			= require('node-env-file');
 const fs			= require('fs-extended');
 const Q				= require('q');
-const exec 			= child_process.exec;
 const containers 	= "https://github.com/caffeinalab/docker-webdev-env";
 
 const execOpts 		= { cwd: CWD, stdio:[0,1,2] }; //stdio is only needed for execSync
+const exec 			= function(cmd, opts, callback) {
+	if (manifest.debug) console.log(cmd, opts);
+	child_process.exec(cmd, opts, callback);
+};
 reqEnvOrExit();
 
 // Helpers
 
 const log = (err, stdout, stderr) => {
-	if (err) error(err, 1, true);
+	//if (err) error(err, 1, true);
 
 	if (stderr != null && stderr != "") process.stdout.write(`${stderr}\n`.yellow);
 	if (stdout != null && stdout != "") process.stdout.write(`${stdout}\n`.blue);
@@ -169,22 +172,23 @@ function cleanFiles(name) {
 // Build
 
 function build(type) {
-	var self = this;
-
-	process.stdout.write("Building docker for the specified environment".green);
-
-	if (!self.type) {
-		error("Please provide build environment [dev|prod]");
+	process.stdout.write("Building docker for the specified environment\n".green);
+	type = _.isString(type) ? type : _.isObject(type.environment) ? type.environment : false;
+	
+	if (!type) {
+		error("\nPlease provide build environment [dev|prod]");
+		return;
 	}
 
-	let cmd = ["docker-compose","-f", "yml/docker-compose.yml"];
-	if (type == "dev") {
-		cmd.concat(["-f","yml/docker-compose.dev.yml", "up", "-d", "--build", "--remove-orphans"]);
-	} else if (type == "prod") {
-		cmd.concat(["up", "-d", "--build"]);
+	var cmd = ["docker-compose","-f", "yml/docker-compose.yml"];
+	if (type && type == "dev") {
+		cmd = cmd.concat(["-f","yml/docker-compose.dev.yml", "up", "-d", "--build", "--remove-orphans"]);
+	} else if (type && type == "prod") {
+		cmd = cmd.concat(["up", "-d", "--build"]);
 	}
 
-	exec(cmd.join(" "), execOpts);
+	if (type) exec(cmd.join(" "), execOpts, log);
+	else return;
 }
 
 
@@ -260,6 +264,7 @@ program
 
 program
 .command('build')
+.option("<-e, --environment", "Type of build. [dev|prod]", /^(dev|prod)$/, "dev")
 .description('Build the project')
 .action(build);
 
