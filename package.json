@@ -49,6 +49,7 @@
     "underscore": "^1.8.3",
     "underscore.string": "^3.3.4",
     "universal-analytics": "^0.4.6",
-    "update-notifier": "^0.3.1"
+    "update-notifier": "^0.3.1",
+    "node-env-file": "^0.1.8"
   }
 }
