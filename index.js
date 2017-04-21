@@ -191,17 +191,6 @@ function build(type) {
 	else return;
 }
 
-
-function selectServices() {
-	//prompt;
-}
-
-function configureBaseSchema() {
-	return Q.promise(function(resolve, reject) {
-		
-	});
-}
-
 // Clean
 
 function clean() {
@@ -244,6 +233,32 @@ function removeLoadBalancer() {
 	exec("docker-compose down", _.extend(execOpts, {cwd: CWD + "/network"}) , log);
 }
 
+// Deploy
+
+function deploy() {
+  prompt.start();
+
+  const mysql = require(__dirname + "/schema").mysql;
+
+  prompt.get(mysql.development, function (err, result) {
+    // 
+    // Log the results. 
+    // 
+    console.log('Command-line input received:');
+    console.log('  result: ' + result);
+  });
+}
+
+function selectServices() {
+	//prompt;
+}
+
+function configureBaseSchema() {
+	return Q.promise(function(resolve, reject) {
+		
+	});
+}
+
 /////////////////////////
 // Configure commander //
 /////////////////////////
@@ -256,6 +271,11 @@ program
 ////////////
 // Init P //
 ////////////
+
+program
+.command('deploy')
+.description('Deploy the project')
+.action(deploy);
 
 program
 .command('create')
