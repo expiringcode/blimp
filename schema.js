@@ -1,41 +1,58 @@
-module.exports.mysql = {
-  "development": {
-    properties: {
-      database: {
-        pattern: /^[a-zA-Z\s\-]+$/,
-        message: 'Name must be only letters, spaces, or dashes',
-        required: true
-      },
-      user: {
-        pattern: /^[a-zA-Z\s\-]+$/,
-        message: 'Name must be only letters, spaces, or dashes',
-        required: true
-      },
-      password: {
-        hidden: true
-      },
-      root_password: {
-        hidden: true,
-        default: 'root',             // Default value to use if no value is entered. 
-      },
-      allow_empy_password: {
-        default: true,
-        type: 'boolean'
-      },
-      select: {
-        type: 'checkbox',
-        name: 'allow_empy_password',
-        message: "Allow a database user with an empty password: ",
-        choices: [{
-          name: "yes",
-          value: true
-        }, {
-          name: "no",
-          value: false
-        }]
-      }
+module.exports.mysql = { // use nested prompt
+  "development": [{
+    validate: (input) => { 
+      return /^[a-zA-Z\s\-]+$/.test(input) || 
+        'Name must be only letters, spaces, or dashes'.red
+    },
+    name: "databaseName",
+    message: "Database name".magenta,
+    required: true
+  },{
+    validate: (input) => { 
+      return /^[a-zA-Z\s\-]+$/.test(input) ||
+        'Enter a username for your database user'.red
+    },
+    name: "databaseUser",
+    message: "Database username".magenta,
+    required: true
+  },{
+    name: "databasePassword",
+    message: "Database password".magenta,
+    type: "password",
+    validate: (input) => { 
+      return input.length > 0 ||
+        'Enter a password'.red
     }
-  },
+  },{
+    hidden: true,
+    default: 'root',
+    name: "databaseRootPassword",
+    type: "password",
+    validate: (input) => { 
+      return input.length > 0 || 
+        "Password for root user" 
+    },
+    when: () => { return true },
+    message: "Set a password for `root` or leave it to it's default (root)".magenta
+  },{
+  //   name: "databaseAllowEmpty",
+  //   message: "Allow the creation of users without a password".magenta,
+  //   type: 'confirm',
+  //   validate: (input) => { return /y[es]*|n[o]?/.test(input) },
+  //   check: 'Must respond yes or no'.red,
+  // },{
+    type: 'list',
+    name: 'allowEmpyPassword',
+    message: "Allow a database user with an empty password?".magenta,
+    pageSize: 2,
+    choices: [{
+      name: "yes",
+      value: true
+    }, {
+      name: "no",
+      value: false
+    }]
+  }],
   "production": {
     properties: {
       database: {
