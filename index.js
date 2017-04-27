@@ -15,6 +15,7 @@ const escape 		= require("shell-escape")
 const env 			= require('node-env-file')
 const fs			= require('fs-extended')
 const Q				= require('q')
+const colors 		= require('colors')
 const containers 	= "https://github.com/caffeinalab/docker-webdev-env"
 
 const execOpts 		= { cwd: CWD, stdio:[0,1,2], sync: true } // stdio is only needed for execSync|spawn
@@ -284,26 +285,35 @@ function deploy() {
 // Setup //
 ///////////
 
+function ask(block) {
+	return Q.promise((resolve, reject) => {
+		const schema = require(`${__dirname}/services_conf/${block}`)
+		if (_.isArray(schema)) {
+			inquirer.prompt(schema)
+			.then(resolve)
+		} else {
+			if (_.isArray(schema.development)) {
+				inquirer.prompt(schema.development)
+				.then((dev) => {
+					if (!_.isArray(schema.production)) return resolve({dev: dev})
+					inquirer.prompt(schema.production)
+					.then((prod) => {
+						return resolve({dev: dev, prod: prod})
+					})
+				})
+			}
+		}
+	});
+}
+
 function setup() {
-	const mysql = require(__dirname + "/schema").mysql
-
-	inquirer.prompt(mysql.development, (answer) => {
-		console.log(answer)
+	ask("services")
+	.then((a) => {
+		console.log(JSON.stringify(a).red)
 	})
-
-  // prompt.start({noHandleSIGINT: true})
-  // prompt.message = "Input ".green
-  // prompt.delimiter = " • ".yellow 
-
-  // prompt.get(mysql.development, function (err, result) {
-  //   console.log('\nCommand-line input received:'.green)
-  //   console.log('  result: ' + JSON.stringify(result).blue)
-  // })
-
-  // process.on('SIGINT', function() {
-  //   console.log("You didn't complete all configuration. This may lead to bugs".red);
-  //   process.exit();
-  // });
+	.catch((e) => {
+		console.log(e.toString().red)
+	})
 }
 
 function selectServices() {

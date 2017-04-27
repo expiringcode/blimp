@@ -1,4 +1,4 @@
-module.exports.mysql = { // use nested prompt
+module.exports = { // use nested prompt
   "development": [{
     validate: (input) => { 
       return /^[a-zA-Z\s\-]+$/.test(input) || 
