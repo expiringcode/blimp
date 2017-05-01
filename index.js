@@ -20,6 +20,16 @@ const containers 	= "https://github.com/caffeinalab/docker-webdev-env"
 
 const execOpts 		= { cwd: CWD, stdio:[0,1,2], sync: true } // stdio is only needed for execSync|spawn
 reqEnvOrExit()
+const schemaMap		= {
+	php7: "php", 
+	php: "php", 
+	hhvm: "hhvm", 
+	mariadb: "mysql", 
+	mysql: "mysql",
+	nodejs: "node",
+	mongodb: "mongo",
+	redis: "redis"
+}
 
 /////////////
 // Helpers //
@@ -310,6 +320,11 @@ function setup() {
 	ask("services")
 	.then((a) => {
 		console.log(JSON.stringify(a).red)
+		let promises = []
+		a.services.forEach((service) => {
+			promises.push(ask(schemaMap[service]))
+		});
+		return Q.all(promises)
 	})
 	.catch((e) => {
 		console.log(e.toString().red)
