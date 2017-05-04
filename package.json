@@ -52,6 +52,8 @@
     "universal-analytics": "^0.4.13",
     "update-notifier": "^2.1.0",
     "node-env-file": "^0.1.8",
-    "shell-escape": "^0.2.0"
+    "shell-escape": "^0.2.0",
+    "yamljs": "^0.2.10",
+    "js-yaml": "^3.8.3"
   }
 }
