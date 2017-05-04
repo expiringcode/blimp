@@ -4,14 +4,14 @@ This tool lets you create a docker based environment with a micro-services archi
 
 The idea behind this tool is to make it easy to start developing web applications. The steps are as follows
 
-1. Create a new project based on a template
-2. Set it up with an easy prompt
+- Create a new project based on a template
+- Set it up with an easy prompt
   - Select services
   - Configure each service
-3. Dev/Test cycle locally
-4. Build/Deploy to the production server
-5. Enabling A/B testing
-6. Rollback
+- Dev/Test cycle locally
+- Build/Deploy to the production server
+- Enabling A/B testing
+- Rollback
 
 ## Requirements
 * node `^7.0.0`
@@ -88,9 +88,9 @@ WIP
 
 ## Dependencies
 
-1. [Docker template](https://github.com/caffeinalab/docker-webdev-env)
+- [Docker template](https://github.com/caffeinalab/docker-webdev-env)
   - Architecture for micro-services based web development with the option to create many projects or different instances of the same one.
-2. [AeriaWork](https://git.caffeina.co/open-source/aeriawork)
+- [AeriaWork](https://git.caffeina.co/open-source/aeriawork)
   - In the case of php web development, if you create an empty project and build it, the php image will automatically initialize an **AeriaWork** project.
 
 ## License
