@@ -25,10 +25,10 @@ module.exports = [{
       name: "MariaDB",
       value: "mariadb"
     }, {
-      name: "NGinX",
+      name: "NGinx",
       value: "nginx"
     }, {
-      name: "NGinX-Built",
+      name: "NGinx-Built",
       value: "nginxb"
     }],
     validate: (choices) => {

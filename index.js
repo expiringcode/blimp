@@ -16,6 +16,7 @@ const env 			= require('node-env-file')
 const fs			= require('fs-extended')
 const Q				= require('q')
 const colors 		= require('colors')
+const yaml			= require('js-yaml')
 const containers 	= "https://github.com/caffeinalab/docker-webdev-env"
 
 const execOpts 		= { cwd: CWD, stdio:[0,1,2], sync: true } // stdio is only needed for execSync|spawn
