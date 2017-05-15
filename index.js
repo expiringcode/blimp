@@ -22,9 +22,9 @@ const containers 	= "https://github.com/caffeinalab/docker-webdev-env"
 const execOpts 		= { cwd: CWD, stdio:[0,1,2], sync: true } // stdio is only needed for execSync|spawn
 reqEnvOrExit()
 const schemaMap		= {
-	php7: "php", 
+	php7: "php",
 	php: "php", 
-	hhvm: "hhvm", 
+	hhvm: "php",
 	mariadb: "mysql", 
 	mysql: "mysql",
 	nodejs: "node",
@@ -299,14 +299,17 @@ function deploy() {
 function ask(block) {
 	return Q.promise((resolve, reject) => {
 		const schema = require(`${__dirname}/services_conf/${block}`)
+		console.log(`\n${block.toUpperCase()}`.green);
 		if (_.isArray(schema)) {
 			inquirer.prompt(schema)
 			.then(resolve)
 		} else {
 			if (_.isArray(schema.development)) {
+				console.log("Development variables\n".green)
 				inquirer.prompt(schema.development)
 				.then((dev) => {
 					if (!_.isArray(schema.production)) return resolve({dev: dev})
+					console.log("Production variables\n".green)
 					inquirer.prompt(schema.production)
 					.then((prod) => {
 						return resolve({dev: dev, prod: prod})
@@ -317,15 +320,30 @@ function ask(block) {
 	});
 }
 
+function recursiveAsk(schemas) {
+	var schema = null
+	if (schemas && (schema = schemas.shift())) {
+		return ask(schema)
+		.then(function() {
+			return recursiveAsk(schemas)
+		})
+	} else {
+		return Q.resolve();
+	}
+}
+
 function setup() {
-	ask("services")
+	ask('main')
+	.then((m) => {
+		// save main
+		return ask("services")
+	})
 	.then((a) => {
-		console.log(JSON.stringify(a).red)
-		let promises = []
+		var services = []
 		a.services.forEach((service) => {
-			promises.push(ask(schemaMap[service]))
+			if (services.indexOf(schemaMap[service]) == -1) services.push(schemaMap[service])
 		});
-		return Q.all(promises)
+		return recursiveAsk(services)
 	})
 	.catch((e) => {
 		console.log(e.toString().red)
