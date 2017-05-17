@@ -17,6 +17,7 @@ const fs			= require('fs-extended')
 const Q				= require('q')
 const colors 		= require('colors')
 const yaml			= require('js-yaml')
+const git 			= require('simple-git')
 const containers 	= "https://github.com/caffeinalab/docker-webdev-env"
 
 const execOpts 		= { cwd: CWD, stdio:[0,1,2], sync: true } // stdio is only needed for execSync|spawn
@@ -124,6 +125,15 @@ function gitCommit(message) {
 			exec(['git', 'push'], execOpts)
 		})
 	})
+}
+
+function gitInit() {
+	git()
+	.init()
+	.add('./*')
+	.commit("First commit!")
+	.addRemote('origin', 'https://github.com/user/repo.git')
+	.push('origin', 'master');
 }
 
 function gitClone(dir, callback) {
@@ -296,23 +306,46 @@ function deploy() {
 // Setup //
 ///////////
 
+function writeEnv(opts) {
+	return Q.promise((resolve, reject) => {
+		console.log(opts)
+		if (opts.path == null || opts.schema == null) return resolve()
+
+		let s = ""
+
+		
+
+		resolve()
+	})
+}
+
 function ask(block) {
 	return Q.promise((resolve, reject) => {
-		const schema = require(`${__dirname}/services_conf/${block}`)
-		console.log(`\n${block.toUpperCase()}`.green);
-		if (_.isArray(schema)) {
-			inquirer.prompt(schema)
-			.then(resolve)
+		let schema = null
+		try {
+			schema = require(`${__dirname}/services_conf/${block}`)
+		} catch(e) {
+			return resolve({})
+		}
+		console.log(`\n${block.toUpperCase()}`.green)
+
+		if (_.isArray(schema.prompt)) {
+			inquirer.prompt(schema.prompt)
+			.then((d) => {
+				resolve({main: d, source: schema});
+			})
 		} else {
-			if (_.isArray(schema.development)) {
+			if (_.isArray(schema.prompt.development)) {
 				console.log("Development variables\n".green)
-				inquirer.prompt(schema.development)
+				
+				inquirer.prompt(schema.prompt.development)
 				.then((dev) => {
-					if (!_.isArray(schema.production)) return resolve({dev: dev})
+					if (!_.isArray(schema.prompt.production)) return resolve({dev: dev, source: schema})
 					console.log("Production variables\n".green)
-					inquirer.prompt(schema.production)
+					
+					inquirer.prompt(schema.prompt.production)
 					.then((prod) => {
-						return resolve({dev: dev, prod: prod})
+						return resolve({dev: dev, prod: prod, source: schema})
 					})
 				})
 			}
@@ -321,10 +354,11 @@ function ask(block) {
 }
 
 function recursiveAsk(schemas) {
-	var schema = null
+	let schema = null
 	if (schemas && (schema = schemas.shift())) {
 		return ask(schema)
-		.then(function() {
+		.then(writeEnv)
+		.then(() => {
 			return recursiveAsk(schemas)
 		})
 	} else {
@@ -334,13 +368,14 @@ function recursiveAsk(schemas) {
 
 function setup() {
 	ask('main')
+	.then(writeEnv)
 	.then((m) => {
 		// save main
 		return ask("services")
 	})
 	.then((a) => {
-		var services = []
-		a.services.forEach((service) => {
+		let services = []
+		a.main.services.forEach((service) => {
 			if (services.indexOf(schemaMap[service]) == -1) services.push(schemaMap[service])
 		});
 		return recursiveAsk(services)

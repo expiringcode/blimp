@@ -1,4 +1,4 @@
-module.exports = [{
+module.exports.prompt = [{
     type: 'checkbox',
     name: 'services',
     message: "Which services will you use?".magenta,
@@ -62,3 +62,6 @@ module.exports = [{
       return true
     }
   }]
+
+module.exports.map = {}
+module.exports.path = null;

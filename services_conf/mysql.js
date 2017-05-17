@@ -1,10 +1,10 @@
-module.exports = { // use nested prompt
+module.exports.prompt = { // use nested prompt
   "development": [{
     validate: (input) => { 
       return /^[a-zA-Z\s\-]+$/.test(input) || 
         'Name must be only letters, spaces, or dashes'.red
     },
-    name: "databaseName",
+    name: "MYSQL_DATABASE",
     message: "Database name".magenta,
     required: true
   },{
@@ -12,11 +12,11 @@ module.exports = { // use nested prompt
       return /^[a-zA-Z\s\-]+$/.test(input) ||
         'Enter a username for your database user'.red
     },
-    name: "databaseUser",
+    name: "MYSQL_USER",
     message: "Database username".magenta,
     required: true
   },{
-    name: "databasePassword",
+    name: "MYSQL_PASSWORD",
     message: "Database password".magenta,
     type: "password",
     validate: (input) => { 
@@ -26,7 +26,7 @@ module.exports = { // use nested prompt
   },{
     hidden: true,
     default: 'root',
-    name: "databaseRootPassword",
+    name: "MYSQL_ROOT_PASSWORD",
     type: "password",
     validate: (input) => { 
       return input.length > 0 || 
@@ -42,41 +42,56 @@ module.exports = { // use nested prompt
   //   check: 'Must respond yes or no'.red,
   // },{
     type: 'list',
-    name: 'allowEmpyPassword',
+    name: 'MYSQL_ALLOW_EMPTY_PASSWORD',
     message: "Allow a database user with an empty password?".magenta,
     pageSize: 2,
     choices: [{
       name: "yes",
-      value: true
+      value: "yes"
     }, {
       name: "no",
-      value: false
+      value: ""
     }]
   }],
-  "production": {
-    properties: {
-      database: {
-        pattern: /^[a-zA-Z\s\-]+$/,
-        message: 'Name must be only letters, spaces, or dashes',
-        required: true
-      },
-      user: {
-        pattern: /^[a-zA-Z\d]+$/,
-        message: 'Name must be only letters, numbers',
-        required: true
-      },
-      password: {
-        hidden: true
-      },
-      select: {
-        type: 'checkbox',
-        name: 'random_root_password',
-        message: "Generate a random root password: ",
-        choices: [{
-          name: "yes",
-          value: true
-        }]
-      }
+  "production": [{
+    pattern: /^[a-zA-Z\s\-]+$/,
+    name: "MYSQL_DATABASE",
+    message: 'Name must be only letters, spaces, or dashes',
+    required: true
+  }, {
+    pattern: /^[a-zA-Z\d]+$/,
+    name: "MYSQL_USER",
+    message: 'Name must be only letters, numbers',
+    required: true
+  }, {
+    hidden: true
+  }, {
+    name: "MYSQL_PASSWORD",
+    message: "Database password".magenta,
+    type: "password",
+    validate: (input) => { 
+      return input.length > 7 ||
+        'Enter a password at least 8 characters long'.red
     }
+  }]
+}
+
+module.exports.map = {
+  MYSQL_DATABASE: "MYSQL_DATABASE",
+  MYSQL_USER: "MYSQL_USER",
+  MYSQL_PASSWORD: "MYSQL_PASSWORD",
+  MYSQL_ROOT_PASSWORD: "MYSQL_ROOT_PASSWORD",
+  MYSQL_RANDOM_ROOT_PASSWORD: "MYSQL_RANDOM_ROOT_PASSWORD",
+  MYSQL_ALLOW_EMPTY_PASSWORD: "MYSQL_ALLOW_EMPTY_PASSWORD"
+}
+
+module.exports.path = "images/mysql/db"
+
+module.exports.defaults = {
+  dev: {
+
+  },
+  prod: {
+    MYSQL_RANDOM_ROOT_PASSWORD: "yes"
   }
-};
+}
