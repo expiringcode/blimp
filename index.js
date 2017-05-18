@@ -24,14 +24,17 @@ const execOpts 		= { cwd: CWD, stdio:[0,1,2], sync: true } // stdio is only need
 reqEnvOrExit()
 const schemaMap		= {
 	php7: "php",
-	php: "php", 
-	hhvm: "php",
+	php: "php",
+	"php5.6": "php",
+	hhvm: "hhvm",
 	mariadb: "mysql", 
 	mysql: "mysql",
-	nodejs: "node",
+	node: "node",
 	mongodb: "mongo",
-	redis: "redis"
+	redis: "redis",
+	nginx: "nginx"
 }
+var envs 			= []
 
 /////////////
 // Helpers //
@@ -308,13 +311,7 @@ function deploy() {
 
 function writeEnv(opts) {
 	return Q.promise((resolve, reject) => {
-		console.log(opts)
-		if (opts.path == null || opts.schema == null) return resolve()
-
-		let s = ""
-
-		
-
+		envs.push(opts)
 		resolve()
 	})
 }
@@ -329,6 +326,8 @@ function ask(block) {
 		}
 		console.log(`\n${block.toUpperCase()}`.green)
 
+		if (!schema.prompt) return resolve({source: schema});
+
 		if (_.isArray(schema.prompt)) {
 			inquirer.prompt(schema.prompt)
 			.then((d) => {
@@ -336,12 +335,12 @@ function ask(block) {
 			})
 		} else {
 			if (_.isArray(schema.prompt.development)) {
-				console.log("Development variables\n".green)
+				console.log("\n > Development variables".blue)
 				
 				inquirer.prompt(schema.prompt.development)
 				.then((dev) => {
 					if (!_.isArray(schema.prompt.production)) return resolve({dev: dev, source: schema})
-					console.log("Production variables\n".green)
+					console.log("\n > Production variables".blue)
 					
 					inquirer.prompt(schema.prompt.production)
 					.then((prod) => {
@@ -366,33 +365,50 @@ function recursiveAsk(schemas) {
 	}
 }
 
+function processSingle(node, env) {
+	let updated = {}
+	updated.source = env.source
+	updated[node] = {}
+	
+	_.mapObject(env[node], (value, key) => {
+		let mapKey = env.source.map && env.source.map[key] ? env.source.map[key] : null
+
+		if (_.isArray(mapKey)) _(mapKey).each( k => updated[node][k] = value )
+		else if (_.isString(mapKey)) updated[node][mapKey] = value
+		else updated[node][key] = value
+	})
+
+	updated[node] = _.extend(env.source.defaults ? env.source.defaults[node] : {}, updated[node])
+
+	return updated
+}
+
+function processConfig() {
+	return Q.promise((resolve, reject) => {
+		let all = []
+		envs.forEach((env) => {
+			if (env.main) all.push(processSingle("main", env))
+			else all.push(_.extend(processSingle("dev", env), processSingle("prod", env)))
+		});
+		
+		resolve(all)
+	})
+}
+
 function setup() {
 	ask('main')
 	.then(writeEnv)
-	.then((m) => {
-		// save main
-		return ask("services")
-	})
+	.then(m => ask("services"))
 	.then((a) => {
 		let services = []
 		a.main.services.forEach((service) => {
-			if (services.indexOf(schemaMap[service]) == -1) services.push(schemaMap[service])
+			service = schemaMap[service] || service
+			if (services.indexOf(service) == -1) services.push(service)
 		});
 		return recursiveAsk(services)
 	})
-	.catch((e) => {
-		console.log(e.toString().red)
-	})
-}
-
-function selectServices() {
-	//prompt
-}
-
-function configureBaseSchema() {
-	return Q.promise(function(resolve, reject) {
-		
-	})
+	.then(processConfig)
+	.catch(e => console.log(e.toString().red))
 }
 
 /////////////////////////
