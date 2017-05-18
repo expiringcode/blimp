@@ -390,9 +390,13 @@ function processConfig() {
 			if (env.main) all.push(processSingle("main", env))
 			else all.push(_.extend(processSingle("dev", env), processSingle("prod", env)))
 		});
-		
+
 		resolve(all)
 	})
+}
+
+function linker() {
+	
 }
 
 function setup() {
@@ -408,6 +412,7 @@ function setup() {
 		return recursiveAsk(services)
 	})
 	.then(processConfig)
+	.then(linker)
 	.catch(e => console.log(e.toString().red))
 }
 
