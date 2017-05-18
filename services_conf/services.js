@@ -2,7 +2,7 @@ module.exports.prompt = [{
     type: 'checkbox',
     name: 'services',
     message: "Which services will you use?".magenta,
-    pageSize: 3,
+    pageSize: 5,
     choices: [{
       name: "Php 7 (suggested Nginx, Redis)",
       value: "php7"

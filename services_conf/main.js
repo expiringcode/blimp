@@ -17,7 +17,7 @@ module.exports.prompt = [{
   required: true
 },{
   name: "DB_PORT",
-  default: 3388,
+  default: 8806,
   message: "DBMS Port".magenta
 },{
   default: 'test',

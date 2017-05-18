@@ -1,6 +1,6 @@
 module.exports.prompt = { // use nested prompt
   "development": [{
-    validate: (input) => { 
+    validate: (input) => {
       return /^[a-zA-Z\s\-]+$/.test(input) || 
         'Name must be only letters, spaces, or dashes'.red
     },
@@ -35,12 +35,6 @@ module.exports.prompt = { // use nested prompt
     when: () => { return true },
     message: "Set a password for `root` or leave it to it's default (root)".magenta
   },{
-  //   name: "databaseAllowEmpty",
-  //   message: "Allow the creation of users without a password".magenta,
-  //   type: 'confirm',
-  //   validate: (input) => { return /y[es]*|n[o]?/.test(input) },
-  //   check: 'Must respond yes or no'.red,
-  // },{
     type: 'list',
     name: 'MYSQL_ALLOW_EMPTY_PASSWORD',
     message: "Allow a database user with an empty password?".magenta,
@@ -54,24 +48,28 @@ module.exports.prompt = { // use nested prompt
     }]
   }],
   "production": [{
-    pattern: /^[a-zA-Z\s\-]+$/,
+    validate: (input) => {
+      return /^[a-zA-Z\s\-]+$/.test(input) || 
+        'Name must be only letters, spaces, or dashes'.red
+    },
     name: "MYSQL_DATABASE",
-    message: 'Name must be only letters, spaces, or dashes',
+    message: "Database name".magenta,
     required: true
-  }, {
-    pattern: /^[a-zA-Z\d]+$/,
+  },{
+    validate: (input) => { 
+      return /^[a-zA-Z\s\-]+$/.test(input) ||
+        'Enter a username for your database user'.red
+    },
     name: "MYSQL_USER",
-    message: 'Name must be only letters, numbers',
+    message: "Database username".magenta,
     required: true
-  }, {
-    hidden: true
-  }, {
+  },{
     name: "MYSQL_PASSWORD",
     message: "Database password".magenta,
     type: "password",
     validate: (input) => { 
-      return input.length > 7 ||
-        'Enter a password at least 8 characters long'.red
+      return input.length > 0 ||
+        'Enter a password'.red
     }
   }]
 }

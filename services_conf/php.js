@@ -1,154 +1,74 @@
 module.exports.prompt = { // use nested prompt
   "development": [{
-    validate: (input) => { 
-      return /^[a-zA-Z\s\-]+$/.test(input) || 
-        'Name must be only letters, spaces, or dashes'.red
-    },
-    name: "databaseName",
-    message: "Database name".magenta,
+    name: "HOSTNAME",
+    message: "Hostname".magenta,
+    default: "localhost",
     required: true
   },{
-    validate: (input) => { 
-      return /^[a-zA-Z\s\-]+$/.test(input) ||
-        'Enter a username for your database user'.red
-    },
-    name: "databaseUser",
-    message: "Database username".magenta,
+    name: "PUBLIC_URL",
+    message: "Public URL (*.local)".magenta,
     required: true
-  },{
-    name: "databasePassword",
-    message: "Database password".magenta,
-    type: "password",
-    validate: (input) => { 
-      return input.length > 0 ||
-        'Enter a password'.red
-    }
-  },{
-    hidden: true,
-    default: 'root',
-    name: "databaseRootPassword",
-    type: "password",
-    validate: (input) => { 
-      return input.length > 0 || 
-        "Password for root user" 
-    },
-    when: () => { return true },
-    message: "Set a password for `root` or leave it to it's default (root)".magenta
-  },{
-  //   name: "databaseAllowEmpty",
-  //   message: "Allow the creation of users without a password".magenta,
-  //   type: 'confirm',
-  //   validate: (input) => { return /y[es]*|n[o]?/.test(input) },
-  //   check: 'Must respond yes or no'.red,
-  // },{
-    type: 'list',
-    name: 'allowEmpyPassword',
-    message: "Allow a database user with an empty password?".magenta,
-    pageSize: 2,
-    choices: [{
-      name: "yes",
-      value: true
-    }, {
-      name: "no",
-      value: false
-    }]
   }],
   "production": [{
-      validate: (input) => { 
-        return /^[a-zA-Z\s\-]+$/.test(input) || 
-          'Name must be only letters, spaces, or dashes'.red
-      },
-      name: "databaseName",
-      message: "Database name".magenta,
-      required: true
-    },{
-      validate: (input) => { 
-        return /^[a-zA-Z\s\-]+$/.test(input) ||
-          'Enter a username for your database user'.red
-      },
-      name: "databaseUser",
-      message: "Database username".magenta,
-      required: true
-    },{
-      name: "databasePassword",
-      message: "Database password".magenta,
-      type: "password",
-      validate: (input) => { 
-        return input.length > 0 ||
-          'Enter a password'.red
-      }
-    },{
-      hidden: true,
-      default: 'root',
-      name: "databaseRootPassword",
-      type: "password",
-      validate: (input) => { 
-        return input.length > 0 || 
-          "Password for root user" 
-      },
-      when: () => { return true },
-      message: "Set a password for `root` or leave it to it's default (root)".magenta
+    name: "HOSTNAME",
+    message: "Hostname".magenta,
+    default: "localhost",
+    required: true
+  },{
+    name: "PUBLIC_URL",
+    message: "Public URL (*.local)".magenta,
+    required: true
   }]
 }
 
 module.exports.map = {
-  databaseName: "",
-  databaseUser: "",
-  databasePassword: "",
-  databaseRootPassword: ""
+  HOSTNAME: ["HOSTNAME", "HTTP_HOST"],
+  PUBLIC_URL: "PUBLIC_URL"
 }
 
 module.exports.path = "images/php/php"
 
 module.exports.defaults = {
   dev: {
-    TZ: "Europe/Rome",
-    DOCKER: "1",
-    ENV: "local",
+    TZ: "Europe/Rome",          // Defaults
+    DOCKER: "1",                // Defaults
+    ENV: "local",               // Defaults
+    WP_POST_REVISIONS: "false", // Defaults
+    WP_USE_THEMES: "false",     // Defaults
+    WP_LANG: "it_IT",           // Defaults
 
-    DB_NAME: "test",    // Match with MySQL
-    DB_HOST: "mysql",   // Match with MySQL
-    DB_USER: "admin",   // Match with MySQL
-    DB_PASS: "admin",   // Match with MySQL
+    DB_NAME: "",          // Match with MySQL
+    DB_HOST: "",          // Match with MySQL
+    DB_USER: "",          // Match with MySQL
+    DB_PASS: "",          // Match with MySQL
 
-    WP_POST_REVISIONS: "false",
-    WP_USE_THEMES: "false",
-    WP_LANG: "it_IT",
+    PROJECT_NAME: "test", // Match with main
+    APP_ID: "aeriawork",  // Match with main
+    PORT: "8880",         // Match with main
 
     HTTP_HOST: "localhost",
-    PROJECT_NAME: "test", // Match with main
-    APP_ID: "aeriawork",
-
-    WORKDIR: "/www",
-    PWD: "/www",
-
-    PUBLIC_URL: "http://aeriawork.vanadio.dev",
     HOSTNAME: "localhost",
-    PORT: "8880",     // Match with main
+    PUBLIC_URL: "http://aeriawork.vanadio.dev"
   },
   prod: {
-    TZ: "Europe/Rome",
-    DOCKER: "1",
-    ENV: "local",
+    TZ: "Europe/Rome",          // Defaults
+    DOCKER: "1",                // Defaults
+    ENV: "local",               // Defaults
+    WP_POST_REVISIONS: "false", // Defaults
+    WP_USE_THEMES: "false",     // Defaults
+    WP_LANG: "it_IT",           // Defaults
 
-    DB_NAME: "test",    // Match with MySQL
-    DB_HOST: "mysql",   // Match with MySQL
-    DB_USER: "admin",   // Match with MySQL
-    DB_PASS: "admin",   // Match with MySQL
+    DB_NAME: "",          // Match with MySQL
+    DB_HOST: "",          // Match with MySQL
+    DB_USER: "",          // Match with MySQL
+    DB_PASS: "",          // Match with MySQL
 
-    WP_POST_REVISIONS: "false",
-    WP_USE_THEMES: "false",
-    WP_LANG: "it_IT",
+    PROJECT_NAME: "test", // Match with main
+    APP_ID: "aeriawork",  // Match with main
+    PORT: "8880",         // Match with main
 
     HTTP_HOST: "localhost",
-    PROJECT_NAME: "test", // Match with main
-    APP_ID: "aeriawork",
-
-    WORKDIR: "/www",
-    PWD: "/www",
-
-    PUBLIC_URL: "http://aeriawork.vanadio.dev",
     HOSTNAME: "localhost",
-    PORT: "8880",     // Match with main
+    PUBLIC_URL: "http://aeriawork.vanadio.dev"
   }
 }
