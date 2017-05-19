@@ -27,7 +27,7 @@ const schemaMap		= {
 	php: "php",
 	"php5.6": "php",
 	hhvm: "hhvm",
-	mariadb: "mysql", 
+	mariadb: "mariadb", 
 	mysql: "mysql",
 	node: "node",
 	mongodb: "mongo",
@@ -35,6 +35,7 @@ const schemaMap		= {
 	nginx: "nginx"
 }
 var envs 			= []
+var order			= []
 
 /////////////
 // Helpers //
@@ -136,7 +137,7 @@ function gitInit() {
 	.add('./*')
 	.commit("First commit!")
 	.addRemote('origin', 'https://github.com/user/repo.git')
-	.push('origin', 'master');
+	.push('origin', 'master')
 }
 
 function gitClone(dir, callback) {
@@ -326,12 +327,12 @@ function ask(block) {
 		}
 		console.log(`\n${block.toUpperCase()}`.green)
 
-		if (!schema.prompt) return resolve({source: schema});
+		if (!schema.prompt) return resolve({source: schema})
 
 		if (_.isArray(schema.prompt)) {
 			inquirer.prompt(schema.prompt)
 			.then((d) => {
-				resolve({main: d, source: schema});
+				resolve({main: d, source: schema})
 			})
 		} else {
 			if (_.isArray(schema.prompt.development)) {
@@ -349,7 +350,7 @@ function ask(block) {
 				})
 			}
 		}
-	});
+	})
 }
 
 function recursiveAsk(schemas) {
@@ -361,7 +362,7 @@ function recursiveAsk(schemas) {
 			return recursiveAsk(schemas)
 		})
 	} else {
-		return Q.resolve();
+		return Q.resolve()
 	}
 }
 
@@ -386,17 +387,106 @@ function processSingle(node, env) {
 function processConfig() {
 	return Q.promise((resolve, reject) => {
 		let all = []
-		envs.forEach((env) => {
+		envs.forEach((env, index) => {
 			if (env.main) all.push(processSingle("main", env))
-			else all.push(_.extend(processSingle("dev", env), processSingle("prod", env)))
-		});
-
+			else all.push( _.extend(
+				processSingle("dev", env), 
+				processSingle("prod", env) ))
+		})
 		resolve(all)
 	})
 }
 
-function linker() {
-	
+function linker(envs) {
+	return Q.promise((resolve, reject) => {
+		let linked = []
+		envs.forEach((env, index) => {
+			let current = env
+			// continue if there aren't any dependencies for the current service
+			if (!current.source.dependencies) return linked.push(current)
+
+			// for each dependency of the current object
+			current.source.dependencies.forEach((dep) => {
+				_(dep).mapObject((pointer, key) => {
+
+					_(pointer).mapObject((pointerKey, service) => {
+						let serviceIndex = order.indexOf(service)
+						let serviceObject = -1 != serviceIndex ? envs[++serviceIndex] : envs[0]
+
+						if (serviceObject.main) {
+							if (current.dev) current.dev[key] = serviceObject.main[pointerKey]
+							if (current.prod && !current.prod[key]) current.prod[key] = serviceObject.main[pointerKey]
+						} 
+
+						if (serviceObject.dev && current.dev) current.dev[key] = serviceObject.dev[pointerKey]
+						if (serviceObject.prod && current.prod && !current.prod[key])	current.prod[key] = serviceObject.prod[pointerKey]
+					})
+				})
+			})
+			linked.push(current)
+		})
+
+		return resolve(linked)
+	})
+}
+
+function makeConfjson(all) {
+	return Q.promise((resolve, reject) => {
+		let omitted = []
+		all.forEach(conf => {
+			if (conf.source) {
+				conf.source = { path: conf.source.path }
+				if (conf.source.path != null) omitted.push(conf)
+			}
+		})
+
+		omitted = {globals: omitted.shift(), services: omitted}
+		fs.createFileSync(`${CWD}/config.json`, JSON.stringify(omitted))
+
+		return resolve(omitted)
+	})
+}
+
+function toEnv(ob) {
+	let str = [];
+
+	_(ob).mapObject((v, k) => {
+		if (undefined == v || 'undefined' == v) return
+		str.push(`${k.replace(" ", "_")}=` + (/\s/g.test(v) || v.length == 0 ? `'${v}'` : v))
+	})
+	return str.join("\n")
+}
+
+function writeEnvFiles(config) {
+	return Q.promise((resolve, reject) => {
+		if (!_(config).isObject()) {
+			if (!fs.existsSync(`${CWD}/config.json`)) {
+				console.log("Missing config.json".red)
+				return reject()
+			} else {
+				config = fs.readJSONSync(`${CWD}/config.json`)
+			}
+		}
+
+		if (config.globals) {
+			if (config.globals.source.path) {
+				fs.createFileSync(`${CWD}/${config.globals.source.path}.env`, toEnv(config.globals.main))
+			}
+		}
+
+		_(config.services).each((service) => {
+			if (service.source && service.source.path) {
+				if (_.isObject(service.dev)) {
+					fs.createFileSync(`${CWD}/${service.source.path}.dev.env`, toEnv(service.dev))
+				}
+				if (_.isObject(service.prod)) {
+					fs.createFileSync(`${CWD}/${service.source.path}.env`, toEnv(service.prod))
+				}
+			}
+		})
+
+		resolve()
+	})
 }
 
 function setup() {
@@ -408,11 +498,14 @@ function setup() {
 		a.main.services.forEach((service) => {
 			service = schemaMap[service] || service
 			if (services.indexOf(service) == -1) services.push(service)
-		});
+		})
+		order = _(services).clone()
 		return recursiveAsk(services)
 	})
 	.then(processConfig)
 	.then(linker)
+	.then(makeConfjson)
+	.then(writeEnvFiles)
 	.catch(e => console.log(e.toString().red))
 }
 

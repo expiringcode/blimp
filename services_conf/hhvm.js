@@ -5,3 +5,5 @@ module.exports.map = null
 module.exports.path = null
 
 module.exports.defaults = null
+
+module.exports.dependencies = null

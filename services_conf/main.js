@@ -24,6 +24,10 @@ module.exports.prompt = [{
   name: "PROJECT_NAME",
   message: "Project name".magenta
 },{
+  default: '1.0.0',
+  name: "VERSION",
+  message: "Version of the project".magenta
+},{
   name: "GIT_REMOTE",
   message: "Version control remote url".magenta
 },{
@@ -38,9 +42,12 @@ module.exports.map = {
   DB_PORT: "DB_PORT",
   PROJECT_NAME: "PROJECT_NAME",
   GIT_BRANCH: "GIT_BRANCH",
-  GIT_REMOTE: "GIT_REMOTE"
+  GIT_REMOTE: "GIT_REMOTE",
+  VERSION: "VERSION"
 }
 
 module.exports.path = ""
 
 module.exports.defaults = null
+
+module.exports.dependencies = null

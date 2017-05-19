@@ -64,4 +64,7 @@ module.exports.prompt = [{
   }]
 
 module.exports.map = {}
-module.exports.path = null;
+
+module.exports.path = null
+
+module.exports.dependencies = null

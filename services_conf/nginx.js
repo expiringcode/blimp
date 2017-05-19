@@ -24,12 +24,16 @@ module.exports.map = {
 module.exports.defaults = {
   dev: {
     TZ: "Europe/Rome",
-    ENVIRONMENT: "DEVELOPMENT"
+    ENVIRONMENT: "DEVELOPMENT",
+    WORKDIR: "/www"
   },
   prod: {
     TZ: "Europe/Rome",
-    ENVIRONMENT: "PRODUCTION"
+    ENVIRONMENT: "PRODUCTION",
+    WORKDIR: "/www"
   }
 }
 
-module.exports.path = "images/php/php"
+module.exports.path = "images/nginx/proxy"
+
+module.exports.dependencies = null
