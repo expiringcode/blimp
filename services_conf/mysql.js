@@ -1,3 +1,26 @@
+const pass = require("generate-password")
+
+function askUserAndPassword(q) {
+  if (q.GEN_UP && !q.MYSQL_USER && !q.MYSQL_PASSWORD) {
+    q.MYSQL_USER = pass.generate({
+      length: 10,
+      numbers: false,
+      uppercase: false
+    })
+    q.MYSQL_PASSWORD = pass.generate({
+      length: 25,
+      numbers: true,
+      uppercase: true,
+      symbols: true,
+      strict: true
+    }) 
+    return false
+  } else if (q.MYSQL_USER && q.MYSQL_PASSWORD) {
+    return false    
+  }
+  return true
+}
+
 module.exports.prompt = { // use nested prompt
   "development": [{
     validate: (input) => {
@@ -8,13 +31,26 @@ module.exports.prompt = { // use nested prompt
     message: "Database name".magenta,
     required: true
   },{
+    type: 'list',
+    name: 'GEN_UP',
+    message: "Generate a random username and password?".magenta,
+    pageSize: 2,
+    choices: [{
+      name: "yes",
+      value: true
+    }, {
+      name: "no",
+      value: false
+    }]
+  },{
     validate: (input) => { 
       return /^[a-zA-Z\s\-]+$/.test(input) ||
         'Enter a username for your database user'.red
     },
     name: "MYSQL_USER",
     message: "Database username".magenta,
-    required: true
+    required: true,
+    when: askUserAndPassword
   },{
     name: "MYSQL_PASSWORD",
     message: "Database password".magenta,
@@ -22,7 +58,8 @@ module.exports.prompt = { // use nested prompt
     validate: (input) => { 
       return input.length > 0 ||
         'Enter a password'.red
-    }
+    },
+    when: askUserAndPassword
   },{
     hidden: true,
     default: 'root',
@@ -32,7 +69,7 @@ module.exports.prompt = { // use nested prompt
       return input.length > 0 || 
         "Password for root user" 
     },
-    when: () => { return true },
+    when: () =>  false ,
     message: "Set a password for `root` or leave it to it's default (root)".magenta
   },{
     type: 'list',
@@ -45,7 +82,8 @@ module.exports.prompt = { // use nested prompt
     }, {
       name: "no",
       value: ""
-    }]
+    }],
+    when: false
   }],
   "production": [{
     validate: (input) => {
@@ -56,13 +94,26 @@ module.exports.prompt = { // use nested prompt
     message: "Database name".magenta,
     required: true
   },{
+    type: 'list',
+    name: 'GEN_UP',
+    message: "Generate a random username and password?".magenta,
+    pageSize: 2,
+    choices: [{
+      name: "yes",
+      value: true
+    }, {
+      name: "no",
+      value: false
+    }]
+  },{
     validate: (input) => { 
       return /^[a-zA-Z\s\-]+$/.test(input) ||
         'Enter a username for your database user'.red
     },
     name: "MYSQL_USER",
     message: "Database username".magenta,
-    required: true
+    required: true,
+    when: askUserAndPassword
   },{
     name: "MYSQL_PASSWORD",
     message: "Database password".magenta,
@@ -70,7 +121,8 @@ module.exports.prompt = { // use nested prompt
     validate: (input) => { 
       return input.length > 0 ||
         'Enter a password'.red
-    }
+    },
+    when: askUserAndPassword
   }]
 }
 

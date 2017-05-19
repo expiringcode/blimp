@@ -452,7 +452,7 @@ function toEnv(ob) {
 
 	_(ob).mapObject((v, k) => {
 		if (undefined == v || 'undefined' == v) return
-		str.push(`${k.replace(" ", "_")}=` + (/\s/g.test(v) || v.length == 0 ? `'${v}'` : v))
+		str.push(`${k.replace(" ", "_")}=` + (/\w/g.test(v) && 0 != v.length ? v : `'${v}'`))
 	})
 	return str.join("\n")
 }
