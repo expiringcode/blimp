@@ -1,8 +1,8 @@
-module.exports = [{
+module.exports.prompt = [{
     type: 'checkbox',
     name: 'services',
     message: "Which services will you use?".magenta,
-    pageSize: 3,
+    pageSize: 5,
     choices: [{
       name: "Php 7 (suggested Nginx, Redis)",
       value: "php7"
@@ -25,10 +25,10 @@ module.exports = [{
       name: "MariaDB",
       value: "mariadb"
     }, {
-      name: "NGinX",
+      name: "NGinx",
       value: "nginx"
     }, {
-      name: "NGinX-Built",
+      name: "NGinx-Built",
       value: "nginxb"
     }],
     validate: (choices) => {
@@ -62,3 +62,9 @@ module.exports = [{
       return true
     }
   }]
+
+module.exports.map = {}
+
+module.exports.path = null
+
+module.exports.dependencies = null
