@@ -3,17 +3,44 @@ module.exports.prompt = { // use nested prompt
     name: "PUBLIC_URL",
     message: "Public URL (*.local)".magenta,
     required: true
+  }, {
+    name: "AERIAWORK_ENABLED",
+    message: "Do you want to preload AeriaWork?".magenta,
+    type: 'list',
+    pageSize: 2,
+    required: true,
+    choices: [{
+      name: "yes",
+      value: 1
+    }, {
+      name: "no",
+      value: ''
+    }]
   }],
   "production": [{
     name: "PUBLIC_URL",
     message: "Public URL (*.local)".magenta,
     required: true
+  }, {
+    name: "AERIAWORK_ENABLED",
+    message: "Do you want to preload AeriaWork?".magenta,
+    type: 'list',
+    pageSize: 2,
+    required: true,
+    choices: [{
+      name: "yes",
+      value: 1
+    }, {
+      name: "no",
+      value: ''
+    }]
   }]
 }
 
 module.exports.map = {
   //DOMAIN: ["DOMAIN", "HTTP_HOST"],
-  PUBLIC_URL: "PUBLIC_URL"
+  PUBLIC_URL: "PUBLIC_URL",
+  AERIAWORK_ENABLED: "AERIAWORK_ENABLED"
 }
 
 module.exports.path = "images/php/php"
