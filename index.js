@@ -43,13 +43,13 @@ var order			= []
 
 const exec = (cmd, opts, callback) => {
 	if (opts.sync || !_.isArray(cmd)) {
-		if (manifest.debug) process.stdout.write("--", "Sync command: ", cmd, opts)
+		if (manifest.debug) process.stdout.write("--", "Sync command: ", JSON.stringify(cmd), JSON.stringify(opts))
 
 		if (_.isArray(cmd)) cmd = cmd.join(" ") //escape(cmd)
 		child_process.exec(cmd, opts, callback)
 	} else {
 		//return Q.promise((resolve, reject) => {
-			if (manifest.debug) process.stdout.write("--", "Spawn command", cmd, opts)
+			if (manifest.debug) process.stdout.write("--", "Spawn command", JSON.stringify(cmd), JSON.stringify(opts))
 			let spawned = child_process.spawn(cmd.shift(), cmd, opts)
 			let output = ""
 
