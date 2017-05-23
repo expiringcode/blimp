@@ -16,6 +16,10 @@ module.exports.prompt = [{
   default: 8443,
   required: true
 },{
+  name: "FRONTEND_HTTP",
+  default: 8190,
+  message: "Frontend Port".magenta
+},{
   name: "DB_PORT",
   default: 8806,
   message: "DBMS Port".magenta
@@ -43,7 +47,8 @@ module.exports.map = {
   PROJECT_NAME: "PROJECT_NAME",
   GIT_BRANCH: "GIT_BRANCH",
   GIT_REMOTE: "GIT_REMOTE",
-  VERSION: "VERSION"
+  VERSION: "VERSION",
+  FRONTEND_HTTP: "FRONTEND_HTTP"
 }
 
 module.exports.path = ""
