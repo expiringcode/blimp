@@ -12,7 +12,7 @@ module.exports.prompt = { // use nested prompt
 }
 
 module.exports.map = {
-  //HOSTNAME: ["HOSTNAME", "HTTP_HOST"],
+  //DOMAIN: ["DOMAIN", "HTTP_HOST"],
   PUBLIC_URL: "PUBLIC_URL"
 }
 
@@ -56,7 +56,7 @@ module.exports.defaults = {
     PORT: "80",           // Match with main
 
     /*HTTP_HOST: "localhost",
-    HOSTNAME: "localhost",
+    DOMAIN: "localhost",
     PUBLIC_URL: "http://aeriawork.vanadio.dev"*/
   }
 }
@@ -70,5 +70,5 @@ module.exports.dependencies = [
   { DB_USER:      {mysql: "MYSQL_USER"} },
   { DB_PASS:      {mysql: "MYSQL_PASSWORD"} },
   
-  { HOSTNAME:     {nginx: "DOMAIN"} }
+  { DOMAIN:     {nginx: "DOMAIN"} }
 ]
