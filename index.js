@@ -16,10 +16,26 @@ const env 			= require('node-env-file')
 const fs			= require('fs-extended')
 const Q				= require('q')
 const colors 		= require('colors')
+const yaml			= require('js-yaml')
+const git 			= require('simple-git')
 const containers 	= "https://github.com/caffeinalab/docker-webdev-env"
 
 const execOpts 		= { cwd: CWD, stdio:[0,1,2], sync: true } // stdio is only needed for execSync|spawn
 reqEnvOrExit()
+const schemaMap		= {
+	php7: "php",
+	php: "php",
+	"php5.6": "php",
+	hhvm: "hhvm",
+	mariadb: "mariadb", 
+	mysql: "mysql",
+	node: "node",
+	mongodb: "mongo",
+	redis: "redis",
+	nginx: "nginx"
+}
+var envs 			= []
+var order			= []
 
 /////////////
 // Helpers //
@@ -27,13 +43,13 @@ reqEnvOrExit()
 
 const exec = (cmd, opts, callback) => {
 	if (opts.sync || !_.isArray(cmd)) {
-		if (manifest.debug) console.log("--", "Sync command: ", cmd, opts)
+		if (manifest.debug) process.stdout.write("--", "Sync command: ", JSON.stringify(cmd), JSON.stringify(opts))
 
 		if (_.isArray(cmd)) cmd = cmd.join(" ") //escape(cmd)
 		child_process.exec(cmd, opts, callback)
 	} else {
 		//return Q.promise((resolve, reject) => {
-			if (manifest.debug) console.log("--", "Spawn command", cmd, opts)
+			if (manifest.debug) process.stdout.write("--", "Spawn command", JSON.stringify(cmd), JSON.stringify(opts))
 			let spawned = child_process.spawn(cmd.shift(), cmd, opts)
 			let output = ""
 
@@ -115,6 +131,15 @@ function gitCommit(message) {
 	})
 }
 
+function gitInit() {
+	git()
+	.init()
+	.add('./*')
+	.commit("First commit!")
+	.addRemote('origin', 'https://github.com/user/repo.git')
+	.push('origin', 'master')
+}
+
 function gitClone(dir, callback) {
 	if (_.isFunction(dir) && !callback) {
 		callback = dir
@@ -156,11 +181,11 @@ function create(name) {
 	.then(removeOrigin)
 	.then(cleanFiles)
 	.then(function() {
-		console.log("Project cloned.\n".green)
+		process.stdout.write("Project cloned.\n".green)
 	})
 	.catch(function(e, stderr) {
-		if (_.isString(e)) console.log(e.red)
-		else console.log(e)
+		if (_.isString(e)) process.stdout.write(e.red)
+		else process.stdout.write(e)
 	})
 }
 
@@ -285,45 +310,207 @@ function deploy() {
 // Setup //
 ///////////
 
+function writeEnv(opts) {
+	return Q.promise((resolve, reject) => {
+		envs.push(opts)
+		resolve()
+	})
+}
+
 function ask(block) {
 	return Q.promise((resolve, reject) => {
-		const schema = require(`${__dirname}/services_conf/${block}`)
-		if (_.isArray(schema)) {
-			inquirer.prompt(schema)
-			.then(resolve)
+		let schema = null
+		try {
+			schema = require(`${__dirname}/services_conf/${block}`)
+		} catch(e) {
+			return resolve({})
+		}
+		process.stdout.write(`\n${block.toUpperCase()}`.green)
+
+		if (!schema.prompt) return resolve({source: schema})
+
+		if (_.isArray(schema.prompt)) {
+			inquirer.prompt(schema.prompt)
+			.then((d) => {
+				resolve({main: d, source: schema})
+			})
 		} else {
-			if (_.isArray(schema.development)) {
-				inquirer.prompt(schema.development)
+			if (_.isArray(schema.prompt.development)) {
+				process.stdout.write("\n > Development variables".blue)
+				
+				inquirer.prompt(schema.prompt.development)
 				.then((dev) => {
-					if (!_.isArray(schema.production)) return resolve({dev: dev})
-					inquirer.prompt(schema.production)
+					if (!_.isArray(schema.prompt.production)) return resolve({dev: dev, source: schema})
+					process.stdout.write("\n > Production variables".blue)
+					
+					inquirer.prompt(schema.prompt.production)
 					.then((prod) => {
-						return resolve({dev: dev, prod: prod})
+						return resolve({dev: dev, prod: prod, source: schema})
 					})
 				})
 			}
 		}
-	});
+	})
+}
+
+function recursiveAsk(schemas) {
+	let schema = null
+	if (schemas && (schema = schemas.shift())) {
+		return ask(schema)
+		.then(writeEnv)
+		.then(() => {
+			return recursiveAsk(schemas)
+		})
+	} else {
+		return Q.resolve()
+	}
+}
+
+function processSingle(node, env) {
+	let updated = {}
+	updated.source = env.source
+	updated[node] = {}
+	
+	_.mapObject(env[node], (value, key) => {
+		let mapKey = env.source.map && env.source.map[key] ? env.source.map[key] : null
+
+		if (_.isArray(mapKey)) _(mapKey).each( k => updated[node][k] = value )
+		else if (_.isString(mapKey)) updated[node][mapKey] = value
+		else updated[node][key] = value
+	})
+
+	updated[node] = _.extend(env.source.defaults ? env.source.defaults[node] : {}, updated[node])
+
+	return updated
+}
+
+function processConfig() {
+	return Q.promise((resolve, reject) => {
+		let all = []
+		envs.forEach((env, index) => {
+			if (env.main) all.push(processSingle("main", env))
+			else all.push( _.extend(
+				processSingle("dev", env), 
+				processSingle("prod", env) ))
+		})
+		resolve(all)
+	})
+}
+
+function linker(envs) {
+	return Q.promise((resolve, reject) => {
+		let linked = []
+		envs.forEach((env, index) => {
+			let current = env
+			// continue if there aren't any dependencies for the current service
+			if (!current.source.dependencies) return linked.push(current)
+
+			// for each dependency of the current object
+			current.source.dependencies.forEach((dep) => {
+				_(dep).mapObject((pointer, key) => {
+
+					_(pointer).mapObject((pointerKey, service) => {
+						let serviceIndex = order.indexOf(service)
+						let serviceObject = -1 != serviceIndex ? envs[++serviceIndex] : envs[0]
+
+						if (serviceObject.main) {
+							if (current.dev) current.dev[key] = serviceObject.main[pointerKey]
+							if (current.prod && !current.prod[key]) current.prod[key] = serviceObject.main[pointerKey]
+						} 
+
+						if (serviceObject.dev && current.dev) current.dev[key] = serviceObject.dev[pointerKey]
+						if (serviceObject.prod && current.prod && !current.prod[key])	current.prod[key] = serviceObject.prod[pointerKey]
+					})
+				})
+			})
+			linked.push(current)
+		})
+
+		return resolve(linked)
+	})
+}
+
+function makeConfjson(all) {
+	return Q.promise((resolve, reject) => {
+		let omitted = []
+		all.forEach(conf => {
+			if (conf.source) {
+				conf.source = { path: conf.source.path }
+				if (conf.source.path != null) omitted.push(conf)
+			}
+		})
+
+		omitted = {globals: omitted.shift(), services: omitted}
+		fs.createFileSync(`${CWD}/config.json`, JSON.stringify(omitted))
+
+		return resolve(omitted)
+	})
+}
+
+function toEnv(ob) {
+	let str = [];
+
+	_(ob).mapObject((v, k) => {
+		if (undefined == v || 'undefined' == v) return
+		str.push(`${k.replace(" ", "_")}=` + (!/\w/g.test(v) || !v.length ? `'${v}'` : v))
+	})
+	return str.join("\n")
+}
+
+function writeEnvFiles(config) {
+	return Q.promise((resolve, reject) => {
+		if (!_(config).isObject()) {
+			if (!fs.existsSync(`${CWD}/config.json`)) {
+				process.stdout.write("Missing config.json".red)
+				return reject()
+			} else {
+				config = fs.readJSONSync(`${CWD}/config.json`)
+			}
+		}
+
+		if (config.globals) {
+			if (config.globals.source.path != null) {
+				fs.createFileSync(`${CWD}/${config.globals.source.path}.env`, toEnv(config.globals.main))
+			}
+		}
+
+		_(config.services).each((service) => {
+			if (service.source && service.source.path) {
+				if (_.isObject(service.dev)) {
+					fs.createFileSync(`${CWD}/${service.source.path}.dev.env`, toEnv(service.dev))
+				}
+				if (_.isObject(service.prod)) {
+					fs.createFileSync(`${CWD}/${service.source.path}.env`, toEnv(service.prod))
+				}
+			}
+		})
+
+		resolve()
+	})
 }
 
 function setup() {
-	ask("services")
+	ask('main')
+	.then(writeEnv)
+	.then(m => ask("services"))
 	.then((a) => {
-		console.log(JSON.stringify(a).red)
+		let services = []
+		a.main.services.forEach((service) => {
+			service = schemaMap[service] || service
+			if (services.indexOf(service) == -1) services.push(service)
+		})
+		order = _(services).clone()
+		return recursiveAsk(services)
 	})
-	.catch((e) => {
-		console.log(e.toString().red)
-	})
+	.then(processConfig)
+	.then(linker)
+	.then(makeConfjson)
+	.then(writeEnvFiles)
+	.catch(e => process.stdout.write(e.toString().red))
 }
 
-function selectServices() {
-	//prompt
-}
-
-function configureBaseSchema() {
-	return Q.promise(function(resolve, reject) {
-		
-	})
+function generateEnvs() {
+	writeEnvFiles()
 }
 
 /////////////////////////
@@ -371,6 +558,11 @@ program
 .option("-r, --rm", "Remove loadbalancer and network")
 .description('Create a load balancer and the main network where to attach all the projects')
 .action(loadBalancer)
+
+program
+.command('generate-env')
+.alias("gen")
+.action(generateEnvs)
 
 // Parse the input arguments
 program.parse(process.argv)
