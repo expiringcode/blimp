@@ -43,13 +43,13 @@ var order			= []
 
 const exec = (cmd, opts, callback) => {
 	if (opts.sync || !_.isArray(cmd)) {
-		if (manifest.debug) console.log("--", "Sync command: ", cmd, opts)
+		if (manifest.debug) process.stdout.write("--", "Sync command: ", cmd, opts)
 
 		if (_.isArray(cmd)) cmd = cmd.join(" ") //escape(cmd)
 		child_process.exec(cmd, opts, callback)
 	} else {
 		//return Q.promise((resolve, reject) => {
-			if (manifest.debug) console.log("--", "Spawn command", cmd, opts)
+			if (manifest.debug) process.stdout.write("--", "Spawn command", cmd, opts)
 			let spawned = child_process.spawn(cmd.shift(), cmd, opts)
 			let output = ""
 
@@ -181,11 +181,11 @@ function create(name) {
 	.then(removeOrigin)
 	.then(cleanFiles)
 	.then(function() {
-		console.log("Project cloned.\n".green)
+		process.stdout.write("Project cloned.\n".green)
 	})
 	.catch(function(e, stderr) {
-		if (_.isString(e)) console.log(e.red)
-		else console.log(e)
+		if (_.isString(e)) process.stdout.write(e.red)
+		else process.stdout.write(e)
 	})
 }
 
@@ -325,7 +325,7 @@ function ask(block) {
 		} catch(e) {
 			return resolve({})
 		}
-		console.log(`\n${block.toUpperCase()}`.green)
+		process.stdout.write(`\n${block.toUpperCase()}`.green)
 
 		if (!schema.prompt) return resolve({source: schema})
 
@@ -336,12 +336,12 @@ function ask(block) {
 			})
 		} else {
 			if (_.isArray(schema.prompt.development)) {
-				console.log("\n > Development variables".blue)
+				process.stdout.write("\n > Development variables".blue)
 				
 				inquirer.prompt(schema.prompt.development)
 				.then((dev) => {
 					if (!_.isArray(schema.prompt.production)) return resolve({dev: dev, source: schema})
-					console.log("\n > Production variables".blue)
+					process.stdout.write("\n > Production variables".blue)
 					
 					inquirer.prompt(schema.prompt.production)
 					.then((prod) => {
@@ -452,7 +452,7 @@ function toEnv(ob) {
 
 	_(ob).mapObject((v, k) => {
 		if (undefined == v || 'undefined' == v) return
-		str.push(`${k.replace(" ", "_")}=` + (/\w/g.test(v) && 0 != v.length ? v : `'${v}'`))
+		str.push(`${k.replace(" ", "_")}=` + (!/\w/g.test(v) || !v.length ? `'${v}'` : v))
 	})
 	return str.join("\n")
 }
@@ -461,7 +461,7 @@ function writeEnvFiles(config) {
 	return Q.promise((resolve, reject) => {
 		if (!_(config).isObject()) {
 			if (!fs.existsSync(`${CWD}/config.json`)) {
-				console.log("Missing config.json".red)
+				process.stdout.write("Missing config.json".red)
 				return reject()
 			} else {
 				config = fs.readJSONSync(`${CWD}/config.json`)
@@ -469,7 +469,7 @@ function writeEnvFiles(config) {
 		}
 
 		if (config.globals) {
-			if (config.globals.source.path) {
+			if (config.globals.source.path != null) {
 				fs.createFileSync(`${CWD}/${config.globals.source.path}.env`, toEnv(config.globals.main))
 			}
 		}
@@ -506,7 +506,11 @@ function setup() {
 	.then(linker)
 	.then(makeConfjson)
 	.then(writeEnvFiles)
-	.catch(e => console.log(e.toString().red))
+	.catch(e => process.stdout.write(e.toString().red))
+}
+
+function generateEnvs() {
+	writeEnvFiles()
 }
 
 /////////////////////////
@@ -554,6 +558,11 @@ program
 .option("-r, --rm", "Remove loadbalancer and network")
 .description('Create a load balancer and the main network where to attach all the projects')
 .action(loadBalancer)
+
+program
+.command('generate-env')
+.alias("gen")
+.action(generateEnvs)
 
 // Parse the input arguments
 program.parse(process.argv)
