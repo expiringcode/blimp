@@ -312,6 +312,7 @@ function getin(service) {
 	if (!_.isString(service)) log(null, null, `Command not used correctly. You must provide -s`)
 
 	process.stdout.write(`Getting into container ${service}\n`.green)
+	exec("")
 }
 
 ///////////
