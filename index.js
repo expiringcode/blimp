@@ -304,6 +304,16 @@ function deploy() {
 
 }
 
+////////////
+// Get in //
+////////////
+
+function getin(service) {
+	if (!_.isString(service)) log(null, null, `Command not used correctly. You must provide -s`)
+
+	process.stdout.write(`Getting into container ${service}\n`.green)
+}
+
 ///////////
 // Setup //
 ///////////
@@ -560,7 +570,15 @@ program
 program
 .command('generate-env')
 .alias("gen")
+.description("Generates all env files from the config.json file.")
 .action(generateEnvs)
+
+program
+.command('get-in')
+.alias('run')
+.option('-s, --service', "Service name to get in to i.e. php")
+.description("Get inside the shell of container and run your commands to update it")
+.action(getin)
 
 // Parse the input arguments
 program.parse(process.argv)
