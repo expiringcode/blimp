@@ -26,6 +26,8 @@ module.exports.prompt = [{
 },{
   default: 'test',
   name: "PROJECT_NAME",
+  required: true,
+  validate: input => !/(?=.*[A-Z])/g.test(input) || "Project name must be lowercase",
   message: "Project name".magenta
 },{
   default: '1.0.0',

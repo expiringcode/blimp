@@ -16,7 +16,7 @@ function askUserAndPassword(q) {
     }) 
     return false
   } else if (q.MYSQL_USER && q.MYSQL_PASSWORD) {
-    return false    
+    return false
   }
   return true
 }
@@ -25,7 +25,7 @@ module.exports.prompt = { // use nested prompt
   "development": [{
     validate: (input) => {
       return /^[a-zA-Z\s\-]+$/.test(input) || 
-        'Name must be only letters, spaces, or dashes'.red
+        'Name must be only letters or dashes'.red
     },
     name: "MYSQL_DATABASE",
     message: "Database name".magenta,
