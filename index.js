@@ -25,9 +25,7 @@ reqEnvOrExit()
 const schemaMap		= {
 	php7: "php",
 	php: "php",
-	"php5.6": "php",
 	hhvm: "hhvm",
-	mariadb: "mariadb", 
 	mysql: "mysql",
 	node: "node",
 	mongodb: "mongo",
@@ -441,7 +439,7 @@ function makeConfjson(all) {
 		})
 
 		omitted = {globals: omitted.shift(), services: omitted}
-		fs.createFileSync(`${CWD}/config.json`, JSON.stringify(omitted))
+		fs.createFileSync(`${CWD}/config.json`, JSON.stringify(omitted, null, "    "))
 
 		return resolve(omitted)
 	})

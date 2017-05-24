@@ -24,7 +24,7 @@ module.exports.prompt = [{
   default: 8806,
   message: "DBMS Port".magenta
 },{
-  default: 'test',
+  default: process.cwd().split("/").pop(),
   name: "PROJECT_NAME",
   required: true,
   validate: input => !/(?=.*[A-Z])/g.test(input) || "Project name must be lowercase",
