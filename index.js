@@ -321,16 +321,16 @@ function ask(block) {
 		try {
 			schema = require(`${__dirname}/services_conf/${block}`)
 		} catch(e) {
-			return resolve({})
+			return resolve({service: block})
 		}
 		process.stdout.write(`\n${block.toUpperCase()}`.green)
 
-		if (!schema.prompt) return resolve({source: schema})
+		if (!schema.prompt) return resolve({service: block, source: schema})
 
 		if (_.isArray(schema.prompt)) {
 			inquirer.prompt(schema.prompt)
 			.then((d) => {
-				resolve({main: d, source: schema})
+				resolve({service: block, main: d, source: schema})
 			})
 		} else {
 			if (_.isArray(schema.prompt.development)) {
@@ -338,12 +338,12 @@ function ask(block) {
 				
 				inquirer.prompt(schema.prompt.development)
 				.then((dev) => {
-					if (!_.isArray(schema.prompt.production)) return resolve({dev: dev, source: schema})
+					if (!_.isArray(schema.prompt.production)) return resolve({service: block, dev: dev, source: schema})
 					process.stdout.write("\n > Production variables".blue)
 					
 					inquirer.prompt(schema.prompt.production)
 					.then((prod) => {
-						return resolve({dev: dev, prod: prod, source: schema})
+						return resolve({service: block, dev: dev, prod: prod, source: schema})
 					})
 				})
 			}
@@ -365,7 +365,9 @@ function recursiveAsk(schemas) {
 }
 
 function processSingle(node, env) {
-	let updated = {}
+	let updated = {
+		service: env.service
+	}
 	updated.source = env.source
 	updated[node] = {}
 	
