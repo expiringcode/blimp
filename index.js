@@ -312,7 +312,17 @@ function getin(service) {
 	if (!_.isString(service)) log(null, null, `Command not used correctly. You must provide -s`)
 
 	process.stdout.write(`Getting into container ${service}\n`.green)
-	exec("")
+	
+	service = service.toLowerCase()
+
+	let found = false
+	_(schemaMap).mapObject((v, k) => {
+		if (k == service) found = true
+	})
+
+	if (service == "mysql") service = "db"
+	
+	exec(`bash -c "clear && docker exec -id ${service}_${CWD.split("/").pop()} sh"`, execOpts, log)
 }
 
 ///////////
@@ -554,7 +564,7 @@ program
 
 program
 .command('build')
-.option("<-e, --environment", "Type of build. [dev|prod]", /^(dev|prod)$/, "dev")
+.option("-e, --environment", "Type of build. [dev|prod]", /^(dev|prod)$/, "dev")
 .description('Build the project')
 .action(build)
 
