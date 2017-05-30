@@ -367,7 +367,7 @@ function getin(service) {
 
 function exportService(service, tag) {
 	if (!_.isString(service)) return log(null, null, `Command not used correctly. You must provide -s`)
-	if (!_.isString(tag)) tag = 'latest'
+	if (!_.isString(tag)) tag = projectVersion()
 	
 	process.stdout.write(`Exporting ${service} in ${CWD}/dist \n`.green)
 	fs.createDirSync(`${CWD}/dist`);
