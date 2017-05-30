@@ -345,7 +345,7 @@ function deploy() {
 ////////////
 
 function getin(service) {
-	if (!_.isString(service)) log(null, null, `Command not used correctly. You must provide -s`)
+	if (!_.isString(service)) return log(null, null, `Command not used correctly. You must provide -s`)
 
 	process.stdout.write(`Getting into container ${service}\n`.green)
 	
@@ -365,15 +365,33 @@ function getin(service) {
 // Export //
 ////////////
 
-function exportService(service) {
-	if (!_.isString(service)) log(null, null, `Command not used correctly. You must provide -s`)
+function exportService(service, tag) {
+	if (!_.isString(service)) return log(null, null, `Command not used correctly. You must provide -s`)
+	if (!_.isString(tag)) tag = 'latest'
 	
 	process.stdout.write(`Exporting ${service} in ${CWD}/dist \n`.green)
 	fs.createDirSync(`${CWD}/dist`);
 
 	if (service == "mysql") service = "db"
 
-	let cmd = ["docker", "save", "-o", `${CWD}/dist/${service}_${projectName()}.tar`, `${service}_${projectName()}:${projectVersion()}`]
+	let cmd = ["docker", "save", "-o", `${CWD}/dist/${service}_${projectName()}.tar`, `${service}_${projectName()}:${tag}`]
+
+	exec(cmd, execOpts, log);
+}
+
+//////////
+// Load //
+//////////
+
+function loadService(service) {
+	if (!_.isString(service)) return log(null, null, `Command not used correctly. You must provide -s`)
+	
+	process.stdout.write(`Loading ${service} in ${CWD}/dist \n`.green)
+
+	if (service == "mysql") service = "db"
+	if (!fs.existsSync(`${CWD}/dist/${service}_${projectName()}.tar`)) return log(null, null, `Image doesn't seem to exist in ./dist/ \n`.red)
+
+	let cmd = ["docker", "load", "-i", `${CWD}/dist/${service}_${projectName()}.tar`]
 
 	exec(cmd, execOpts, log);
 }
@@ -649,8 +667,15 @@ program
 program
 .command('export')
 .option('-s, --service', "Service name to export i.e. php")
-.description("Get inside the shell of container and run your commands to update it")
+.option('-t, --tag', "Service tag i.e. 1.0.0. If not provided, `latest` will be used")
+.description("Export a container and save it under ./dist folder as a tar image")
 .action(exportService)
+
+program
+.command('load')
+.option('-s, --service', "Service name to load i.e. php")
+.description("Load a previously exported image. The command will look in ./dist folder for the image")
+.action(loadService)
 
 // Parse the input arguments
 program.parse(process.argv)
