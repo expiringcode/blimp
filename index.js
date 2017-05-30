@@ -25,9 +25,7 @@ reqEnvOrExit()
 const schemaMap		= {
 	php7: "php",
 	php: "php",
-	"php5.6": "php",
 	hhvm: "hhvm",
-	mariadb: "mariadb", 
 	mysql: "mysql",
 	node: "node",
 	mongodb: "mongo",
@@ -94,8 +92,44 @@ function reqEnvOrExit(){
 	if (fs.existsSync(`${CWD}/.env`)) env(`${CWD}/.env`)
 	if (fs.existsSync(`${CWD}/yml/.env`)) return env(`${CWD}/yml/.env`, {overwrite: true})
 
-	if (!fs.existsSync(`${CWD}/.env`)) process.stdout.write('.env file is missing.\n\n'.red)	
+	if (!fs.existsSync(`${CWD}/.env`)) process.stdout.write('.env file is missing.\n\n'.red)
 	if (fs.existsSync(`${CWD}/.env.sample`)) return env(`${CWD}/.env.sample`)
+}
+
+function projectName() {
+	if (!fs.existsSync(`${CWD}/config.json`)) return CWD.split("/").pop()
+
+	let config = require(`${CWD}/config.json`)
+
+	if (config && config.globals && config.globals.main) return config.globals.main.PROJECT_NAME
+	else return CWD.split("/").pop()
+}
+
+function projectVersion() {
+	if (!fs.existsSync(`${CWD}/config.json`)) return '1.0.0'
+
+	let config = require(`${CWD}/config.json`)
+
+	if (config && config.globals && config.globals.main) return config.globals.main.VERSION
+	else return '1.0.0'
+}
+
+function projectBranch() {
+	if (!fs.existsSync(`${CWD}/config.json`)) return 'master'
+
+	let config = require(`${CWD}/config.json`)
+
+	if (config && config.globals && config.globals.main) return config.globals.main.GIT_BRANCH
+	else return 'master'
+}
+
+function projectRepo() {
+	if (!fs.existsSync(`${CWD}/config.json`)) return null
+
+	let config = require(`${CWD}/config.json`)
+
+	if (config && config.globals && config.globals.main) return config.globals.main.GIT_REMOTE
+	else return null
 }
 
 /////////
@@ -306,6 +340,62 @@ function deploy() {
 
 }
 
+////////////
+// Get in //
+////////////
+
+function getin(service) {
+	if (!_.isString(service)) return log(null, null, `Command not used correctly. You must provide -s`)
+
+	process.stdout.write(`Getting into container ${service}\n`.green)
+	
+	service = service.toLowerCase()
+
+	let found = false
+	_(schemaMap).mapObject((v, k) => {
+		if (k == service) found = true
+	})
+
+	if (service == "mysql") service = "db"
+	
+	exec(`clear && docker exec -id ${service}_${projectName()} sh`, execOpts, log)
+}
+
+////////////
+// Export //
+////////////
+
+function exportService(service, tag) {
+	if (!_.isString(service)) return log(null, null, `Command not used correctly. You must provide -s`)
+	if (!_.isString(tag)) tag = 'latest'
+	
+	process.stdout.write(`Exporting ${service} in ${CWD}/dist \n`.green)
+	fs.createDirSync(`${CWD}/dist`);
+
+	if (service == "mysql") service = "db"
+
+	let cmd = ["docker", "save", "-o", `${CWD}/dist/${service}_${projectName()}.tar`, `${service}_${projectName()}:${tag}`]
+
+	exec(cmd, execOpts, log);
+}
+
+//////////
+// Load //
+//////////
+
+function loadService(service) {
+	if (!_.isString(service)) return log(null, null, `Command not used correctly. You must provide -s`)
+	
+	process.stdout.write(`Loading ${service} in ${CWD}/dist \n`.green)
+
+	if (service == "mysql") service = "db"
+	if (!fs.existsSync(`${CWD}/dist/${service}_${projectName()}.tar`)) return log(null, null, `Image doesn't seem to exist in ./dist/ \n`.red)
+
+	let cmd = ["docker", "load", "-i", `${CWD}/dist/${service}_${projectName()}.tar`]
+
+	exec(cmd, execOpts, log);
+}
+
 ///////////
 // Setup //
 ///////////
@@ -443,7 +533,7 @@ function makeConfjson(all) {
 		})
 
 		omitted = {globals: omitted.shift(), services: omitted}
-		fs.createFileSync(`${CWD}/config.json`, JSON.stringify(omitted))
+		fs.createFileSync(`${CWD}/config.json`, JSON.stringify(omitted, null, "    "))
 
 		return resolve(omitted)
 	})
@@ -545,7 +635,7 @@ program
 
 program
 .command('build')
-.option("<-e, --environment", "Type of build. [dev|prod]", /^(dev|prod)$/, "dev")
+.option("-e, --environment", "Type of build. [dev|prod]", /^(dev|prod)$/, "dev")
 .description('Build the project')
 .action(build)
 
@@ -564,7 +654,28 @@ program
 program
 .command('generate-env')
 .alias("gen")
+.description("Generates all env files from the config.json file.")
 .action(generateEnvs)
+
+program
+.command('get-in')
+.alias('run')
+.option('-s, --service', "Service name to get in to i.e. php")
+.description("Get inside the shell of container and run your commands to update it")
+.action(getin)
+
+program
+.command('export')
+.option('-s, --service', "Service name to export i.e. php")
+.option('-t, --tag', "Service tag i.e. 1.0.0. If not provided, `latest` will be used")
+.description("Export a container and save it under ./dist folder as a tar image")
+.action(exportService)
+
+program
+.command('load')
+.option('-s, --service', "Service name to load i.e. php")
+.description("Load a previously exported image. The command will look in ./dist folder for the image")
+.action(loadService)
 
 // Parse the input arguments
 program.parse(process.argv)

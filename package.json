@@ -19,7 +19,7 @@
     "web"
   ],
   "bin": {
-    "dockerize": "./index.js"
+    "blimp": "./index.js"
   },
   "author": "Ani Sinanaj",
   "license": "MIT",
