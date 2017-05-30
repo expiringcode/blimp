@@ -92,8 +92,44 @@ function reqEnvOrExit(){
 	if (fs.existsSync(`${CWD}/.env`)) env(`${CWD}/.env`)
 	if (fs.existsSync(`${CWD}/yml/.env`)) return env(`${CWD}/yml/.env`, {overwrite: true})
 
-	if (!fs.existsSync(`${CWD}/.env`)) process.stdout.write('.env file is missing.\n\n'.red)	
+	if (!fs.existsSync(`${CWD}/.env`)) process.stdout.write('.env file is missing.\n\n'.red)
 	if (fs.existsSync(`${CWD}/.env.sample`)) return env(`${CWD}/.env.sample`)
+}
+
+function projectName() {
+	if (!fs.existsSync(`${CWD}/config.json`)) return CWD.split("/").pop()
+
+	let config = require(`${CWD}/config.json`)
+
+	if (config && config.globals && config.globals.main) return config.globals.main.PROJECT_NAME
+	else return CWD.split("/").pop()
+}
+
+function projectVersion() {
+	if (!fs.existsSync(`${CWD}/config.json`)) return '1.0.0'
+
+	let config = require(`${CWD}/config.json`)
+
+	if (config && config.globals && config.globals.main) return config.globals.main.VERSION
+	else return '1.0.0'
+}
+
+function projectBranch() {
+	if (!fs.existsSync(`${CWD}/config.json`)) return 'master'
+
+	let config = require(`${CWD}/config.json`)
+
+	if (config && config.globals && config.globals.main) return config.globals.main.GIT_BRANCH
+	else return 'master'
+}
+
+function projectRepo() {
+	if (!fs.existsSync(`${CWD}/config.json`)) return null
+
+	let config = require(`${CWD}/config.json`)
+
+	if (config && config.globals && config.globals.main) return config.globals.main.GIT_REMOTE
+	else return null
 }
 
 /////////
@@ -322,7 +358,24 @@ function getin(service) {
 
 	if (service == "mysql") service = "db"
 	
-	exec(`bash -c "clear && docker exec -id ${service}_${CWD.split("/").pop()} sh"`, execOpts, log)
+	exec(`clear && docker exec -id ${service}_${projectName()} sh`, execOpts, log)
+}
+
+////////////
+// Export //
+////////////
+
+function exportService(service) {
+	if (!_.isString(service)) log(null, null, `Command not used correctly. You must provide -s`)
+	
+	process.stdout.write(`Exporting ${service} in ${CWD}/dist \n`.green)
+	fs.createDirSync(`${CWD}/dist`);
+
+	if (service == "mysql") service = "db"
+
+	let cmd = ["docker", "save", "-o", `${CWD}/dist/${service}_${projectName()}.tar`, `${service}_${projectName()}:${projectVersion()}`]
+
+	exec(cmd, execOpts, log);
 }
 
 ///////////
@@ -592,6 +645,12 @@ program
 .option('-s, --service', "Service name to get in to i.e. php")
 .description("Get inside the shell of container and run your commands to update it")
 .action(getin)
+
+program
+.command('export')
+.option('-s, --service', "Service name to export i.e. php")
+.description("Get inside the shell of container and run your commands to update it")
+.action(exportService)
 
 // Parse the input arguments
 program.parse(process.argv)
