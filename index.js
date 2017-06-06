@@ -172,6 +172,8 @@ function gitInit() {
 	.commit("First commit!")
 	.addRemote('origin', 'https://github.com/user/repo.git')
 	.push('origin', 'master')
+
+	return Q.resolve();
 }
 
 function gitClone(dir, callback) {
@@ -598,6 +600,7 @@ function setup() {
 	.then(linker)
 	.then(makeConfjson)
 	.then(writeEnvFiles)
+	//.then(gitInit)
 	.catch(e => process.stdout.write(e.toString().red))
 }
 
