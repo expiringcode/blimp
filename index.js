@@ -278,12 +278,12 @@ function build(type) {
 		return
 	}
 
-	var cmd = ["docker-compose","-f", "yml/docker-compose.yml"]
+	var cmd = ["docker-compose", "-f", "yml/docker-compose.yml"]
 	if (type == "dev") {
-		cmd = cmd.concat(["-f","yml/docker-compose.dev.yml", "up", "-d", "--build", "--remove-orphans"])
-	} else if (type == "prod") {
-		cmd = cmd.concat(["up", "-d", "--build"])
+		cmd = cmd.concat(["-f", "yml/docker-compose.dev.yml"]) //, "--remove-orphans"
 	}
+
+	cmd = cmd.concat(["up", "-d", "--build"])
 
 	exec(cmd, execOpts, log)
 }
