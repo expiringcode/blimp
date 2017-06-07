@@ -47,11 +47,12 @@ const exec = (cmd, opts, callback) => {
 		child_process.exec(cmd, opts, callback)
 	} else {
 		//return Q.promise((resolve, reject) => {
-			if (manifest.debug) console.log("--", "Spawn command", JSON.stringify(cmd), JSON.stringify(opts))
+			if (manifest.debug) console.log("--", "Spawn command", JSON.stringify(cmd), cmd.join(" "), JSON.stringify(opts))
+
 			let spawned = child_process.spawn(cmd.shift(), cmd, opts)
 			let output = ""
 
-			spawned.stdout.on("data", (d) => {
+			/*spawned.stdout.on("data", (d) => {
 				output += d.toString()
 			})
 			spawned.stderr.on("data", (d) => {
@@ -63,7 +64,7 @@ const exec = (cmd, opts, callback) => {
 				if (callback) callback(err, output, false)
 				else log(err, output, false)
 				//else resolve(output)
-			})
+			})*/
 		//})
 	}
 }
@@ -278,14 +279,14 @@ function build(type) {
 		return
 	}
 
-	var cmd = ["docker-compose", "-f", "yml/docker-compose.yml"]
+	var cmd = ["docker-compose", "-f", "yml/docker-compose.yml", "--project-name", projectName()]
 	if (type == "dev") {
 		cmd = cmd.concat(["-f", "yml/docker-compose.dev.yml"]) //, "--remove-orphans"
 	}
 
 	cmd = cmd.concat(["up", "-d", "--build"])
 
-	exec(cmd, execOpts, log)
+	exec(cmd, _.extend(execOpts, {sync: false}), log)
 }
 
 ///////////
@@ -360,7 +361,7 @@ function getin(service) {
 
 	if (service == "mysql") service = "db"
 	
-	exec(`clear && docker exec -id ${service}_${projectName()} sh`, execOpts, log)
+	exec([`docker`, `exec`, `-it`, `${service}_${projectName()}`, `sh`], _.extend(execOpts, {sync: false}), log)
 }
 
 ////////////
