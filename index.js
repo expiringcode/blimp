@@ -50,21 +50,13 @@ const exec = (cmd, opts, callback) => {
 			if (manifest.debug) console.log("--", "Spawn command", JSON.stringify(cmd), cmd.join(" "), JSON.stringify(opts))
 
 			let spawned = child_process.spawn(cmd.shift(), cmd, opts)
-			let output = ""
-
-			/*spawned.stdout.on("data", (d) => {
-				output += d.toString()
-			})
-			spawned.stderr.on("data", (d) => {
-				output += d.toString()
-			})
 			spawned.on("close", (err) => {
-				if (err != 0) log(`Process exited with code ${err}`)
+				if (err != 0) log(`Process exited with code ${err}`, false, false)
 
-				if (callback) callback(err, output, false)
-				else log(err, output, false)
+				if (callback) callback(err, false, false)
+				else log(err, false, false)
 				//else resolve(output)
-			})*/
+			})
 		//})
 	}
 }
@@ -133,6 +125,15 @@ function projectRepo() {
 	else return null
 }
 
+function filesMap(itemPath, stat) {
+    return {
+        path: itemPath,
+        name: path.basename(itemPath),
+        ext: path.extname(itemPath),
+        size: stat.size,
+    };
+}
+
 /////////
 // Git //
 /////////
@@ -167,12 +168,13 @@ function gitCommit(message) {
 }
 
 function gitInit() {
-	git()
+	// To be implemented
+	/*git()
 	.init()
 	.add('./*')
 	.commit("First commit!")
 	.addRemote('origin', 'https://github.com/user/repo.git')
-	.push('origin', 'master')
+	.push('origin', 'master')*/
 
 	return Q.resolve();
 }
@@ -183,9 +185,15 @@ function gitClone(dir, callback) {
 		dir = "."
 	}
 
-	let cmd = ['git','clone', containers, dir]
 	process.stdout.write("Cloning docker infrastructure...\n".green)
-	return exec(cmd, execOpts, callback)
+	
+	/*git()
+	.clone(containers, dir, null, () => {
+		if(_.isFunction(callback)) callback()
+	})*/
+
+	let cmd = ['git','clone', containers, dir]
+	return exec(cmd, _.extend(execOpts, {sync: false}), callback)
 }
 
 function gitRemoveRemote(dir, callback) {
@@ -194,9 +202,14 @@ function gitRemoveRemote(dir, callback) {
 		dir = "."
 	}
 
-	let cmd = ['rm','-rf', `${dir}/.git`]
 	process.stdout.write("Resetting git...\n".green)
-	return exec(cmd, execOpts, callback)
+
+	/*let cmd = ['rm','-rf', `${dir}/.git`]
+	return exec(cmd, execOpts, callback)*/
+	
+	fs.deleteDir(`${dir}/.git`, () => {
+		if (_.isFunction(callback)) callback()
+	});
 }
 
 ///////////////
@@ -256,13 +269,14 @@ function removeOrigin(name) {
 
 function cleanFiles(name) {
 	return Q.promise(function(resolve, reject) {
-		let cmd = ["rm", "-rf", "*.png", ".gitignore", "*.md"]
-		exec(cmd, _.extend(execOpts, {cwd: `${CWD}/${name}`}), (err, stdout, stderr) => {
-			if (err) return reject(err, stderr)
-			log(false, stdout, stderr)
-			
-			resolve(stdout, stderr)
-		})
+
+		fs.listAll(`${CWD}/${name}`, { map: filesMap }, function (err, files) {
+			files.forEach(f => {
+				if (".md" == f.ext || ".png" == f.ext || ".gitignore" == f.ext) fs.deleteFile(f.path) 
+			})
+		});
+
+		resolve();
 	})
 }
 
@@ -293,16 +307,24 @@ function build(type) {
 // Clean //
 ///////////
 
-function clean() {
+function clean(rm) {
+	var self = this
 
-	process.stdout.write("Careful! This command is to be used only on development environments \n".yellow)
-	process.stdout.write("It will delete all docker networks and volumes along with all orphan containers\n".red)
-
-	exec("docker network prune -f && docker volume prune -f", execOpts, (err, stdout, stderr) => {
-		process.stdout.write(`${stderr} \n`.red)
-
-		exec("docker-compose down", _.extend(execOpts, {cwd: `${CWD}/yml`}), log)
-	})
+	if (self.rm) {
+		process.stdout.write("Careful! This command is to be used only on development environments \n".yellow)
+		process.stdout.write("It will delete all docker networks and volumes along with all orphan containers\n".red)
+		exec(["docker", "network", "prune", "-f"], _.extend(execOpts, {sync: false}), (err, stdout, stderr) => {
+			log(err, stdout, stderr)
+			exec(["docker", "volume", "prune", "-f"], _.extend(execOpts, {sync: false}), (err, stdout, stderr) => {
+				log(err, stdout, stderr)
+				exec(["docker-compose", "down"], 
+				 _.extend(execOpts, {cwd: `${CWD}/yml`, sync: false}), log)
+			})
+		})
+	} else {
+		exec(["docker-compose", "down"], 
+			 _.extend(execOpts, {cwd: `${CWD}/yml`, sync: false}), log)
+	}
 }
 
 ///////////////////
@@ -332,7 +354,7 @@ function loadBalancer() {
 
 function removeLoadBalancer() {
 	process.stdout.write("Removing main network and load balancer\n".green)
-	exec("docker-compose down", _.extend(execOpts, {cwd: CWD + "/network"}) , log)
+	exec(["docker-compose", "down"], _.extend(execOpts, {cwd: CWD + "/network", sync: false}) , log)
 }
 
 ////////////
@@ -379,7 +401,7 @@ function exportService(service, tag) {
 
 	let cmd = ["docker", "save", "-o", `${CWD}/dist/${service}_${projectName()}.tar`, `${service}_${projectName()}:${tag}`]
 
-	exec(cmd, execOpts, log);
+	exec(cmd, _.extend(execOpts, {sync: false}), log);
 }
 
 //////////
@@ -396,7 +418,7 @@ function loadService(service) {
 
 	let cmd = ["docker", "load", "-i", `${CWD}/dist/${service}_${projectName()}.tar`]
 
-	exec(cmd, execOpts, log);
+	exec(cmd, _.extend(execOpts, {sync: false}), log);
 }
 
 ///////////
@@ -646,6 +668,7 @@ program
 program
 .command('clean')
 .description('Clean the whole docker environment')
+.option("-r, --rm", "Remove networks and volumes")
 .action(clean)
 
 program
