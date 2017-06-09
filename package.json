@@ -29,7 +29,7 @@
   },
   "homepage": "https://github.com/caffeinalab/docker-webdev-env#readme",
   "preferGlobal": true,
-  "debug": true,
+  "debug": false,
   "dependencies": {
     "async": "^2.3.0",
     "colors": "^1.1.2",
