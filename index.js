@@ -383,7 +383,7 @@ function getin(service) {
 
 	if (service == "mysql") service = "db"
 	
-	exec([`docker`, `exec`, `-it`, `${service}_${projectName()}`, `sh`], _.extend(execOpts, {sync: false}), log)
+	exec([`docker`, `exec`, `-it`, `${service}_${projectName()}${projectBranch()}`, `sh`], _.extend(execOpts, {sync: false}), log)
 }
 
 ////////////
