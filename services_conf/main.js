@@ -57,4 +57,6 @@ module.exports.path = ""
 
 module.exports.defaults = null
 
-module.exports.dependencies = null
+module.exports.dependencies = [
+  { PHP_MODS:     {php: "PHP_MODS"} }
+]
