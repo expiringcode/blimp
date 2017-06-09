@@ -39,11 +39,6 @@ module.exports.prompt = { // use nested prompt
       name: "no",
       value: ''
     }]
-  }, {
-    name: "PHP_MODS",
-    message: "Php modules needed for the project separated by space".magenta,
-    default: "",
-    required: false
   }]
 }
 

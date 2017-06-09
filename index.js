@@ -525,7 +525,6 @@ function linker(envs) {
 			// for each dependency of the current object
 			current.source.dependencies.forEach((dep) => {
 				_(dep).mapObject((pointer, key) => {
-
 					_(pointer).mapObject((pointerKey, service) => {
 						let serviceIndex = order.indexOf(service)
 						let serviceObject = -1 != serviceIndex ? envs[++serviceIndex] : envs[0]
@@ -533,10 +532,12 @@ function linker(envs) {
 						if (serviceObject.main) {
 							if (current.dev) current.dev[key] = serviceObject.main[pointerKey]
 							if (current.prod && !current.prod[key]) current.prod[key] = serviceObject.main[pointerKey]
-						} 
+						}
 
 						if (serviceObject.dev && current.dev) current.dev[key] = serviceObject.dev[pointerKey]
 						if (serviceObject.prod && current.prod && !current.prod[key])	current.prod[key] = serviceObject.prod[pointerKey]
+
+						if (current.main && serviceObject.dev) current.main[key] = serviceObject.dev[pointerKey]
 					})
 				})
 			})
