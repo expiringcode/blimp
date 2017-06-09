@@ -399,7 +399,13 @@ function exportService(service, tag) {
 
 	if (service == "mysql") service = "db"
 
-	let cmd = ["docker", "save", "-o", `${CWD}/dist/${service}_${projectName()}.tar`, `${service}_${projectName()}:${tag}`]
+	let cmd = [
+		"docker", 
+		"save", 
+		"-o", 
+		`${CWD}/dist/${service}_${projectName()}${projectBranch()}.tar`, 
+		`${service}_${projectName()}${projectBranch()}:${tag}`
+	]
 
 	exec(cmd, _.extend(execOpts, {sync: false}), log);
 }
@@ -414,9 +420,9 @@ function loadService(service) {
 	process.stdout.write(`Loading ${service} in ${CWD}/dist \n`.green)
 
 	if (service == "mysql") service = "db"
-	if (!fs.existsSync(`${CWD}/dist/${service}_${projectName()}.tar`)) return log(null, null, `Image doesn't seem to exist in ./dist/ \n`.red)
+	if (!fs.existsSync(`${CWD}/dist/${service}_${projectName()}${projectBranch()}.tar`)) return log(null, null, `Image doesn't seem to exist in ./dist/ \n`.red)
 
-	let cmd = ["docker", "load", "-i", `${CWD}/dist/${service}_${projectName()}.tar`]
+	let cmd = ["docker", "load", "-i", `${CWD}/dist/${service}_${projectName()}${projectBranch()}.tar`]
 
 	exec(cmd, _.extend(execOpts, {sync: false}), log);
 }
