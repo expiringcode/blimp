@@ -16,6 +16,11 @@ module.exports.prompt = { // use nested prompt
       name: "no",
       value: ''
     }]
+  }, {
+    name: "PHP_MODS",
+    message: "Php modules needed for the project separated by space".magenta,
+    default: "",
+    required: false
   }],
   "production": [{
     name: "PUBLIC_URL",
@@ -63,6 +68,8 @@ module.exports.defaults = {
     PROJECT_NAME: "",     // Match with main
     APP_ID: "",           // Match with main
     PORT: "",             // Match with main
+
+    PHP_MODS: ""
   },
   prod: {
     TZ: "Europe/Rome",          // Defaults
@@ -82,9 +89,7 @@ module.exports.defaults = {
     APP_ID: "",           // Match with main
     PORT: "80",           // Match with main
 
-    /*HTTP_HOST: "localhost",
-    DOMAIN: "localhost",
-    PUBLIC_URL: "http://aeriawork.vanadio.dev"*/
+    PHP_MODS: ""
   }
 }
 
