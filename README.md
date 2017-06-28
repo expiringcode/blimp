@@ -26,7 +26,7 @@ After confirming that your development environment meets the specified [requirem
 First, clone the project:
 
 ```bash
-$ git clone https://github.com/progress44/docker-deploy.git <cli-src>
+$ git clone https://github.com/blimpair/blimp.git <cli-src>
 $ cd <cli-src>
 ```
 
@@ -88,7 +88,7 @@ WIP
 
 ## Dependencies
 
-- [Docker template](https://github.com/caffeinalab/docker-webdev-env)
+- [Docker template](https://github.com/blimpair/architecture)
   - Architecture for micro-services based web development with the option to create many projects or different instances of the same one.
 - [AeriaWork](https://git.caffeina.co/open-source/aeriawork)
   - In the case of php web development, if you create an empty project and build it, the php image will automatically initialize an **AeriaWork** project.
