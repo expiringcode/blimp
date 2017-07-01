@@ -142,6 +142,7 @@ module.exports.defaults = {
 
   },
   prod: {
+    MYSQL_ALLOW_EMPTY_PASSWORD: "no"
     MYSQL_RANDOM_ROOT_PASSWORD: "yes"
   }
 }

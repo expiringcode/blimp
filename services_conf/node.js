@@ -2,7 +2,7 @@ module.exports.prompt = {
   development: [{
     validate: (input) => { 
       return /^\d{4,5}$/.test(input) || 
-        'Port must containt 4/5 numbers'.red
+        'Port must contain 4/5 numbers'.red
     },
     name: "PORT",
     message: "App Port".magenta,
@@ -12,7 +12,7 @@ module.exports.prompt = {
   production: [{
     validate: (input) => { 
       return /^\d{4,5}$/.test(input) || 
-        'Port must containt 4/5 numbers'.red
+        'Port must contain 4/5 numbers'.red
     },
     name: "PORT",
     message: "App Port".magenta,

@@ -31,7 +31,7 @@ const schemaMap		= {
 	mysql: "mysql",
 	node: "node",
 	mongodb: "mongo",
-	influxdb: "influx"
+	influxdb: "influx",
 	redis: "redis",
 	nginx: "nginx"
 }
@@ -449,7 +449,7 @@ function ask(block) {
 		} catch(e) {
 			return resolve({service: block})
 		}
-		process.stdout.write(`\n${block.toUpperCase()}`.green)
+		process.stdout.write(`\n${block.toUpperCase()}\n`.green)
 
 		if (!schema.prompt) return resolve({service: block, source: schema})
 
@@ -460,12 +460,12 @@ function ask(block) {
 			})
 		} else {
 			if (_.isArray(schema.prompt.development)) {
-				process.stdout.write("\n > Development variables".blue)
+				process.stdout.write("\n > Development variables\n".blue)
 				
 				inquirer.prompt(schema.prompt.development)
 				.then((dev) => {
 					if (!_.isArray(schema.prompt.production)) return resolve({service: block, dev: dev, source: schema})
-					process.stdout.write("\n > Production variables".blue)
+					process.stdout.write("\n > Production variables\n".blue)
 					
 					inquirer.prompt(schema.prompt.production)
 					.then((prod) => {
@@ -587,7 +587,9 @@ function toEnv(ob) {
 function updateYml(keys, file) {
 	return Q.promise((resolve, reject) => {
 		try {
-			let yml = yaml.safeLoad(fs.readFileSync(file))
+			if (!fs.existsSync(`${file}.orig`)) fs.writeFileSync(`${file}.orig`, fs.readFileSync(file))
+
+			let yml = yaml.safeLoad(fs.readFileSync(`${file}.orig`))
 			let srv = {}
 			
 			for (let k in yml.services) if (keys.indexOf(k) !== -1) srv[k] = yml.services[k]

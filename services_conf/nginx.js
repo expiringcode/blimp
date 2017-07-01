@@ -1,8 +1,13 @@
 module.exports.prompt = { // use nested prompt
   "development": [{
     name: "DOMAIN",
-    message: "Domain name".magenta,
+    message: "Domain name for the PHP container".magenta,
     default: "localhost",
+    required: true
+  }, {
+    name: "VIRTUAL_HOST",
+    message: "Domain or domains including wildcards for the whole project".magenta,
+    default: "*.localhost",
     required: true
   }],
   "production": [{
@@ -11,14 +16,45 @@ module.exports.prompt = { // use nested prompt
         'Domain name should be of the following pattern subdomain.domain.tld or domain.tld'.red
     },
     name: "DOMAIN",
-    message: "Domain name".magenta,
+    message: "Domain name for the PHP container".magenta,
     default: "localhost",
+    required: true
+  }, {
+    name: "VIRTUAL_HOST",
+    message: "Domain or domains including wildcards for the whole project".magenta,
+    default: "*.localhost",
+    required: true
+  },{
+    name: "LETSENCRYPT_ENABLED",
+    message: "Do you want to enable SSL with Let's encrypt?".magenta,
+    type: 'list',
+    pageSize: 2,
+    required: true,
+    choices: [{
+      name: "yes",
+      value: 1
+    }, {
+      name: "no",
+      value: 0
+    }]
+  }, {
+    name: "LETSENCRYPT_EMAIL",
+    message: "Email to use for Let's Encrypt certificates".magenta,
+    default: "dev@caffeina.com",
+    when: (q) => q.LETSENCRYPT_ENABLED === 1,
+    required: true
+  }, {
+    name: "LETSENCRYPT_HOST",
+    message: "Domain or domains for Let's Encrypt".magenta,
+    default: "domain.com",
+    when: (q) => q.LETSENCRYPT_ENABLED === 1,
     required: true
   }]
 }
 
 module.exports.map = {
-  DOMAIN: "DOMAIN"
+  DOMAIN: "DOMAIN",
+  VIRTUAL_HOST: "VIRTUAL_HOST"
 }
 
 module.exports.defaults = {

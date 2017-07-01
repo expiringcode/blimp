@@ -1,9 +1,5 @@
 module.exports.prompt = { // use nested prompt
   "development": [{
-    name: "PUBLIC_URL",
-    message: "Public URL (*.local)".magenta,
-    required: true
-  }, {
     name: "AERIAWORK_ENABLED",
     message: "Do you want to preload AeriaWork?".magenta,
     type: 'list',
@@ -17,18 +13,40 @@ module.exports.prompt = { // use nested prompt
       value: ''
     }]
   }, {
+    name: "CORE_ENABLED",
+    message: "Do you want to preload Caffeina CORE?".magenta,
+    type: 'list',
+    pageSize: 2,
+    required: true,
+    choices: [{
+      name: "yes",
+      value: 1
+    }, {
+      name: "no",
+      value: ''
+    }]
+  }, {
     name: "PHP_MODS",
-    message: "Php modules needed for the project separated by space".magenta,
+    message: "Php modules needed for the project separated by space (ignored in alpine)".magenta,
     default: "",
     required: false
   }],
   "production": [{
-    name: "PUBLIC_URL",
-    message: "Public URL (*.local)".magenta,
-    required: true
-  }, {
     name: "AERIAWORK_ENABLED",
     message: "Do you want to preload AeriaWork?".magenta,
+    type: 'list',
+    pageSize: 2,
+    required: true,
+    choices: [{
+      name: "yes",
+      value: 1
+    }, {
+      name: "no",
+      value: ''
+    }]
+  }, {
+    name: "CORE_ENABLED",
+    message: "Do you want to preload Caffeina CORE?".magenta,
     type: 'list',
     pageSize: 2,
     required: true,
@@ -44,8 +62,9 @@ module.exports.prompt = { // use nested prompt
 
 module.exports.map = {
   //DOMAIN: ["DOMAIN", "HTTP_HOST"],
-  PUBLIC_URL: "PUBLIC_URL",
-  AERIAWORK_ENABLED: "AERIAWORK_ENABLED"
+  //PUBLIC_URL: "PUBLIC_URL",
+  AERIAWORK_ENABLED: "AERIAWORK_ENABLED",
+  CORE_ENABLED: "CORE_ENABLED"
 }
 
 module.exports.path = "images/php/php"
@@ -102,5 +121,6 @@ module.exports.dependencies = [
   { DB_USER:      {mysql: "MYSQL_USER"} },
   { DB_PASS:      {mysql: "MYSQL_PASSWORD"} },
   
-  { DOMAIN:     {nginx: "DOMAIN"} }
+  { DOMAIN:       {nginx: "DOMAIN"} },
+  { PUBLIC_URL:   {nginx: "DOMAIN"} }
 ]
