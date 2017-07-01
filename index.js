@@ -24,11 +24,14 @@ const execOpts 		= { cwd: CWD, stdio:[0,1,2], sync: true } // stdio is only need
 reqEnvOrExit()
 const schemaMap		= {
 	php7: "php",
+	legacy: "php",
+	phpa: "php",
 	php: "php",
 	hhvm: "hhvm",
 	mysql: "mysql",
 	node: "node",
 	mongodb: "mongo",
+	influxdb: "influx"
 	redis: "redis",
 	nginx: "nginx"
 }
@@ -581,6 +584,32 @@ function toEnv(ob) {
 	return str.join("\n")
 }
 
+function updateYml(keys, file) {
+	return Q.promise((resolve, reject) => {
+		try {
+			let yml = yaml.safeLoad(fs.readFileSync(file))
+			let srv = {}
+			
+			for (let k in yml.services) if (keys.indexOf(k) !== -1) srv[k] = yml.services[k]
+			yml.services = srv
+			
+			fs.writeFileSync(file, yaml.safeDump(yml))
+			resolve()
+		} catch(e) {
+			reject(e)
+		}
+	})
+}
+
+function updateYmls(keys) {
+	return Q.promise((resolve, reject) => {
+		updateYml(keys, `${CWD}/yml/docker-compose.yml`)
+		.then(t => updateYml(keys, `${CWD}/yml/docker-compose.dev.yml`))
+		.then(resolve)
+		.catch(reject)
+	})
+}
+
 function writeEnvFiles(config) {
 	return Q.promise((resolve, reject) => {
 		if (!_(config).isObject()) {
@@ -619,12 +648,17 @@ function setup() {
 	.then(m => ask("services"))
 	.then((a) => {
 		let services = []
+		let keys = []
+
 		a.main.services.forEach((service) => {
-			service = schemaMap[service] || service
-			if (services.indexOf(service) == -1) services.push(service)
+			let srv = schemaMap[service] || service
+			if (services.indexOf(srv) == -1) {
+				services.push(srv)
+				keys.push(service)
+			}
 		})
 		order = _(services).clone()
-		return recursiveAsk(services)
+		return recursiveAsk(services).then(t => updateYmls(keys))
 	})
 	.then(processConfig)
 	.then(linker)

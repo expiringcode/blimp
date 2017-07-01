@@ -4,8 +4,14 @@ module.exports.prompt = [{
     message: "Which services will you use?".magenta,
     pageSize: 5,
     choices: [{
-      name: "Php",
-      value: "php"
+      name: "Php 7",
+      value: "php7"
+    }, {
+      name: "Php 5",
+      value: "legacy"
+    }, {
+      name: "Php Alpine",
+      value: "phpa"
     }, {
       name: "HHVM",
       value: "hhvm"
@@ -15,6 +21,12 @@ module.exports.prompt = [{
     }, {
       name: "NodeJS",
       value: "node"
+    }, {
+      name: "influxDB",
+      value: "influxdb"
+    }, {
+      name: "MongoDB",
+      value: "mongodb"
     }, {
       name: "MySQL",
       value: "mysql"
