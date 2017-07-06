@@ -18,7 +18,7 @@ const Q				= require('q')
 const colors 		= require('colors')
 const yaml			= require('js-yaml')
 const git 			= require('simple-git')
-const containers 	= "https://github.com/caffeinalab/docker-webdev-env"
+const containers 	= "https://github.com/blimpair/architecture"
 
 const execOpts 		= { cwd: CWD, stdio:[0,1,2], sync: true } // stdio is only needed for execSync|spawn
 reqEnvOrExit()
