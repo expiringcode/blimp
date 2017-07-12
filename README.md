@@ -42,12 +42,12 @@ Once you've completed the installation procedure, you can start using the tool.
 
 ### CLI API
 
-When running `npm link` the command `dockerize` is made available globally
+When running `npm link` the command `blimp` is made available globally
 
 #### Create
 
 ```bash
-$ dockerize create <project name> # This project is created in the current working directory
+$ blimp create <project name> # This project is created in the current working directory
 ```
 What this command does is clone the main template for web development and strip it of unnecessary files. It also removes `.git` folder so you can init your own repo.
 
@@ -56,7 +56,7 @@ Once this command completes, you ought to `cd` to the project folder
 #### Setup
 
 ```bash
-$ dockerize setup
+$ blimp setup
 ```
 
 Running setup will start a prompt asking you some questions to configure the project. First it will ask what services you want to enable. Once that is completed, it will start subsequent prompts to complete the configuration of each micro-service, diferentiating between `development` and `production` environments. 
@@ -68,7 +68,7 @@ Running setup will start a prompt asking you some questions to configure the pro
 #### Build
 
 ```bash
-$ dockerize build <env> # requires parameter env which is either dev or prod
+$ blimp build <env> # requires parameter env which is either dev or prod
 ```
 
 Building the project for development creates a symbolic link to the services' data volumes into the project folder so you can work seamlessly. In particular your application in development will reside in `<project dir>/data/`
@@ -78,7 +78,7 @@ The production build command will copy your application code inside the images a
 #### Clean
 
 ```bash
-$ dockerize clean
+$ blimp clean
 ```
 Be careful when running this command as it will delete all services and their data.
 
