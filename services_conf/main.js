@@ -4,19 +4,19 @@ module.exports.prompt = [{
       'A port is made only of numbers.'.red
   },
   name: "PROXY_HTTP",
-  message: "HTTP Port".magenta,
+  message: "HTTP Port (You shouldn't be needing this if you set up the load balancer correctly)".magenta,
   default: 8888,
   required: true
 },{
   validate: (input) => { 
     return true
   },
-  name: "PROXY_HTTPS",
+  name: "PROXY_HTTPS (You shouldn't be needing this if you set up the load balancer correctly)",
   message: "HTTPS Port".magenta,
   default: 8443,
   required: true
 },{
-  name: "FRONTEND_HTTP",
+  name: "FRONTEND_HTTP (You shouldn't be needing this if you set up the load balancer correctly)",
   default: 8190,
   message: "Frontend Port".magenta
 },{

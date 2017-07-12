@@ -13,18 +13,9 @@ module.exports.prompt = { // use nested prompt
       value: ''
     }]
   }, {
-    name: "CORE_ENABLED",
-    message: "Do you want to preload Caffeina CORE?".magenta,
-    type: 'list',
-    pageSize: 2,
-    required: true,
-    choices: [{
-      name: "yes",
-      value: 1
-    }, {
-      name: "no",
-      value: ''
-    }]
+    name: "DOMAIN",
+    message: "[DOMAIN] Endpoint to access this container (equals VIRTUAL_HOST by default)".magenta,
+    required: false
   }, {
     name: "PHP_MODS",
     message: "Php modules needed for the project separated by space (ignored in alpine)".magenta,
@@ -45,18 +36,9 @@ module.exports.prompt = { // use nested prompt
       value: ''
     }]
   }, {
-    name: "CORE_ENABLED",
-    message: "Do you want to preload Caffeina CORE?".magenta,
-    type: 'list',
-    pageSize: 2,
-    required: true,
-    choices: [{
-      name: "yes",
-      value: 1
-    }, {
-      name: "no",
-      value: ''
-    }]
+    name: "DOMAIN",
+    message: "[DOMAIN] Endpoint to access this container (equals VIRTUAL_HOST by default)".magenta,
+    required: false
   }]
 }
 

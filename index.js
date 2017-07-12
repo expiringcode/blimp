@@ -492,9 +492,9 @@ function recursiveAsk(schemas) {
 
 function processSingle(node, env) {
 	let updated = {
-		service: env.service
+		service: env.service,
+		source: env.source
 	}
-	updated.source = env.source
 	updated[node] = {}
 	
 	_.mapObject(env[node], (value, key) => {
@@ -537,6 +537,9 @@ function linker(envs) {
 					_(pointer).mapObject((pointerKey, service) => {
 						let serviceIndex = order.indexOf(service)
 						let serviceObject = -1 != serviceIndex ? envs[++serviceIndex] : envs[0]
+
+						if (current.dev && current.dev[key]) return
+						if (current.prod && current.prod[key]) return
 
 						if (serviceObject.main) {
 							if (current.dev) current.dev[key] = serviceObject.main[pointerKey]

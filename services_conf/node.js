@@ -8,6 +8,10 @@ module.exports.prompt = {
     message: "App Port".magenta,
     default: 3000,
     required: true
+  }, {
+    name: "DOMAIN",
+    message: "[DOMAIN] Endpoint to access this container (equals VIRTUAL_HOST by default)".magenta,
+    required: false
   }],
   production: [{
     validate: (input) => { 
@@ -18,6 +22,10 @@ module.exports.prompt = {
     message: "App Port".magenta,
     default: 3000,
     required: true
+  }, {
+    name: "DOMAIN",
+    message: "[DOMAIN] Endpoint to access this container (equals VIRTUAL_HOST by default)".magenta,
+    required: false
   }]
 }
 
