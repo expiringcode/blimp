@@ -11,14 +11,14 @@ module.exports.prompt = [{
   validate: (input) => { 
     return true
   },
-  name: "PROXY_HTTPS (You shouldn't be needing this if you set up the load balancer correctly)",
-  message: "HTTPS Port".magenta,
+  name: "PROXY_HTTPS",
+  message: "HTTPS Port (You shouldn't be needing this if you set up the load balancer correctly)".magenta,
   default: 8443,
   required: true
 },{
-  name: "FRONTEND_HTTP (You shouldn't be needing this if you set up the load balancer correctly)",
+  name: "FRONTEND_HTTP",
   default: 8190,
-  message: "Frontend Port".magenta
+  message: "Frontend Port (You shouldn't be needing this if you set up the load balancer correctly)".magenta
 },{
   name: "DB_PORT",
   default: 8806,

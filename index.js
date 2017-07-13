@@ -211,8 +211,40 @@ function gitRemoveRemote(dir, callback) {
 	return exec(cmd, execOpts, callback)*/
 	
 	fs.deleteDir(`${dir}/.git`, () => {
-		if (_.isFunction(callback)) callback()
+		fs.deleteDir(`${dir}/network/.git`, () => {
+			if (_.isFunction(callback)) callback()
+		});
 	});
+}
+
+function initSubmodules(dir) {
+	return Q.promise((resolve, reject) => {
+		if (_.isFunction(dir) && !callback) {
+			callback = dir
+			dir = "."
+		}
+
+		return exec(['git','submodule', 'init'], _.extend(execOpts, {sync: false, cwd: `${CWD}/${dir}`}), (err, stdout, stderr) => {
+			if (err) return reject(err, stderr)
+			log(false, stdout, stderr)
+			resolve(dir)
+		})
+	})
+}
+
+function cloneSubmodules(dir) {
+	return Q.promise((resolve, reject) => {
+		if (_.isFunction(dir) && !callback) {
+			callback = dir
+			dir = "."
+		}
+
+		return exec(['git','submodule', 'update'], _.extend(execOpts, {sync: false, cwd: `${CWD}/${dir}`}), (err, stdout, stderr) => {
+			if (err) return reject(err, stderr)
+			log(false, stdout, stderr)
+			resolve(dir)
+		})
+	})
 }
 
 ///////////////
@@ -254,7 +286,11 @@ function createProject(name) {
 			if (err) return reject(err, stderr)
 			log(false, stdout, stderr)
 
-			resolve(name)
+			initSubmodules(name)
+			.then(() => cloneSubmodules(name))
+			.then(() => initSubmodules(`${name}/network`))
+			.then(() => cloneSubmodules(`${name}/network`))
+			.then(() => resolve(name))
 		})
 	})
 }
@@ -264,7 +300,6 @@ function removeOrigin(name) {
 		gitRemoveRemote(name, (err, stdout, stderr) => {
 			if (err) return reject(err, stderr)
 			log(false, stdout, stderr)
-			
 			resolve(name)
 		})
 	})
