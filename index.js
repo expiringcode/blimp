@@ -377,6 +377,13 @@ function loadBalancer() {
 		return
 	}
 
+	// Override .env.sample COMPOSE_PROJECT_NAME
+	try {
+		env(`${CWD}/network/.env`, {overwrite: true});
+	} catch(e) {
+		process.env.COMPOSE_PROJECT_NAME = "network";
+	}
+
 	process.stdout.write("Creating main network and load balancer\n".green)
 	exec("docker network ls", execOpts, (error, stdout, stderr) => {
 		process.stdout.write("Showing all networks: \n".yellow)
