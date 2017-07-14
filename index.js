@@ -134,7 +134,7 @@ function filesMap(itemPath, stat) {
         name: path.basename(itemPath),
         ext: path.extname(itemPath),
         size: stat.size,
-    };
+    }
 }
 
 /////////
@@ -179,7 +179,7 @@ function gitInit() {
 	.addRemote('origin', 'https://github.com/user/repo.git')
 	.push('origin', 'master')*/
 
-	return Q.resolve();
+	return Q.resolve()
 }
 
 function gitClone(dir, callback) {
@@ -213,8 +213,8 @@ function gitRemoveRemote(dir, callback) {
 	fs.deleteDir(`${dir}/.git`, () => {
 		fs.deleteDir(`${dir}/network/.git`, () => {
 			if (_.isFunction(callback)) callback()
-		});
-	});
+		})
+	})
 }
 
 function initSubmodules(dir) {
@@ -312,9 +312,9 @@ function cleanFiles(name) {
 			files.forEach(f => {
 				if (".md" == f.ext || ".png" == f.ext || ".gitignore" == f.ext) fs.deleteFile(f.path) 
 			})
-		});
+		})
 
-		resolve();
+		resolve()
 	})
 }
 
@@ -379,9 +379,9 @@ function loadBalancer() {
 
 	// Override .env.sample COMPOSE_PROJECT_NAME
 	try {
-		env(`${CWD}/network/.env`, {overwrite: true});
+		env(`${CWD}/network/.env`, {overwrite: true})
 	} catch(e) {
-		process.env.COMPOSE_PROJECT_NAME = "network";
+		process.env.COMPOSE_PROJECT_NAME = "network"
 	}
 
 	process.stdout.write("Creating main network and load balancer\n".green)
@@ -440,7 +440,7 @@ function exportService(service, tag) {
 	if (!_.isString(tag)) tag = projectVersion()
 	
 	process.stdout.write(`Exporting ${service} in ${CWD}/dist \n`.green)
-	fs.createDirSync(`${CWD}/dist`);
+	fs.createDirSync(`${CWD}/dist`)
 
 	if (service == "mysql") service = "db"
 
@@ -452,7 +452,7 @@ function exportService(service, tag) {
 		`${service}_${projectName()}${projectBranch()}:${tag}`
 	]
 
-	exec(cmd, _.extend(execOpts, {sync: false}), log);
+	exec(cmd, _.extend(execOpts, {sync: false}), log)
 }
 
 //////////
@@ -469,7 +469,7 @@ function loadService(service) {
 
 	let cmd = ["docker", "load", "-i", `${CWD}/dist/${service}_${projectName()}${projectBranch()}.tar`]
 
-	exec(cmd, _.extend(execOpts, {sync: false}), log);
+	exec(cmd, _.extend(execOpts, {sync: false}), log)
 }
 
 ///////////
@@ -620,7 +620,7 @@ function makeConfjson(all) {
 }
 
 function toEnv(ob) {
-	let str = [];
+	let str = []
 
 	_(ob).mapObject((v, k) => {
 		if (undefined == v || 'undefined' == v) return

@@ -46,7 +46,7 @@ module.exports.map = {
   PROXY_HTTP: "PROXY_HTTP",
   PROXY_HTTPS: "PROXY_HTTPS",
   DB_PORT: "DB_PORT",
-  PROJECT_NAME: "PROJECT_NAME",
+  PROJECT_NAME: ["PROJECT_NAME", "COMPOSE_PROJECT_NAME"],
   GIT_BRANCH: "GIT_BRANCH",
   GIT_REMOTE: "GIT_REMOTE",
   VERSION: "VERSION",
@@ -55,7 +55,9 @@ module.exports.map = {
 
 module.exports.path = ""
 
-module.exports.defaults = null
+module.exports.defaults = {
+  PHP_MODS: "curl"
+}
 
 module.exports.dependencies = [
   { PHP_MODS:     {php: "PHP_MODS"} }

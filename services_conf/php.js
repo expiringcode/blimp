@@ -19,7 +19,7 @@ module.exports.prompt = { // use nested prompt
   }, {
     name: "PHP_MODS",
     message: "Php modules needed for the project separated by space (ignored in alpine)".magenta,
-    default: "",
+    default: "curl",
     required: false
   }],
   "production": [{
@@ -90,7 +90,7 @@ module.exports.defaults = {
     APP_ID: "",           // Match with main
     PORT: "80",           // Match with main
 
-    PHP_MODS: ""
+    PHP_MODS: "curl"
   }
 }
 
