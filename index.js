@@ -385,7 +385,7 @@ function loadBalancer() {
 		if (stdout.indexOf("loadbalancer") != -1) {
 			process.stdout.write("Network already exists".green)
 		} else {
-			exec("docker-compose -f network/docker-compose.yml up -d --build", execOpts, log)
+			exec(["docker-compose", "-f", "network/docker-compose.yml", "up", "-d", "--build"], _.extend(execOpts, {sync: false}), log)
 		}
 	})
 }
