@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/caffeinalab/docker-webdev-env.git"
+    "url": "https://github.com/blimpair/blimp.git"
   },
   "keywords": [
     "docker",
@@ -25,9 +25,9 @@
   "license": "MIT",
   "bugs": {
     "type": "git",
-    "url": "https://github.com/caffeinalab/docker-webdev-env/issues"
+    "url": "https://github.com/blimpair/blimp/issues"
   },
-  "homepage": "https://github.com/caffeinalab/docker-webdev-env#readme",
+  "homepage": "https://github.com/blimpair/blimp#readme",
   "preferGlobal": true,
   "debug": false,
   "dependencies": {
