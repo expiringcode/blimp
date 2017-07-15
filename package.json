@@ -1,5 +1,5 @@
 {
-  "name": "containers",
+  "name": "blimp",
   "version": "1.0.4-beta",
   "description": "Docker web framework initializer",
   "main": "index.js",
