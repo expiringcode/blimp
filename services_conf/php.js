@@ -70,7 +70,7 @@ module.exports.defaults = {
     APP_ID: "",           // Match with main
     PORT: "",             // Match with main
 
-    PHP_MODS: ""
+    PHP_MODS: "curl"
   },
   prod: {
     TZ: "Europe/Rome",          // Defaults

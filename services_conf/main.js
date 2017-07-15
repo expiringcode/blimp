@@ -55,9 +55,7 @@ module.exports.map = {
 
 module.exports.path = ""
 
-module.exports.defaults = {
-  PHP_MODS: "curl"
-}
+module.exports.defaults = null
 
 module.exports.dependencies = [
   { PHP_MODS:     {php: "PHP_MODS"} }
