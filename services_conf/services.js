@@ -33,6 +33,24 @@ module.exports.prompt = [{
     }, {
       name: "Nginx",
       value: "nginx"
+    }, {
+      name: "Tensorflow",
+      value: "tensorflow"
+    }, {
+      name: "ElasticSearch",
+      value: "elasticsearch"
+    }, {
+      name: "Kibana",
+      value: "kibana"
+    }, {
+      name: "Logstash",
+      value: "logstash"
+    }, {
+      name: "Email Server",
+      value: "mailer"
+    }, {
+      name: "LDAP Server",
+      value: "ldapserver"
     }]
   }]
 

@@ -68,7 +68,7 @@ module.exports.defaults = {
 
     PROJECT_NAME: "",     // Match with main
     APP_ID: "",           // Match with main
-    PORT: "",             // Match with main
+    PORT: "80",           // Match with main
 
     PHP_MODS: "curl"
   },
@@ -97,7 +97,6 @@ module.exports.defaults = {
 module.exports.dependencies = [
   { PROJECT_NAME: {main: "PROJECT_NAME"} },
   { APP_ID:       {main: "PROJECT_NAME"} },
-  { PORT:         {main: "PROXY_HTTP"} },
 
   { DB_NAME:      {mysql: "MYSQL_DATABASE"} },
   { DB_USER:      {mysql: "MYSQL_USER"} },

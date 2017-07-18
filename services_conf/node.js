@@ -1,31 +1,55 @@
 module.exports.prompt = {
   development: [{
-    validate: (input) => { 
-      return /^\d{4,5}$/.test(input) || 
-        'Port must contain 4/5 numbers'.red
-    },
-    name: "PORT",
-    message: "App Port".magenta,
-    default: 3000,
+    name: "VIRTUAL_HOST",
+    message: "[VIRTUAL_HOST] Domain(s) managed by this project's nginx".magenta,
+    default: "localhost",
     required: true
-  }, {
-    name: "DOMAIN",
-    message: "[DOMAIN] Endpoint to access this container (equals VIRTUAL_HOST by default)".magenta,
-    required: false
   }],
   production: [{
-    validate: (input) => { 
-      return /^\d{4,5}$/.test(input) || 
-        'Port must contain 4/5 numbers'.red
-    },
-    name: "PORT",
-    message: "App Port".magenta,
-    default: 3000,
+    name: "VIRTUAL_HOST",
+    message: "[VIRTUAL_HOST] Domain(s) managed by this project's nginx".magenta,
+    default: "domain.com",
     required: true
   }, {
-    name: "DOMAIN",
-    message: "[DOMAIN] Endpoint to access this container (equals VIRTUAL_HOST by default)".magenta,
-    required: false
+    name: "LETSENCRYPT_ENABLED",
+    message: "Do you want to enable SSL with Let's encrypt?".magenta,
+    type: 'list',
+    pageSize: 2,
+    required: true,
+    choices: [{
+      name: "yes",
+      value: 1
+    }, {
+      name: "no",
+      value: 0
+    }]
+  }, {
+    name: "LETSENCRYPT_EMAIL",
+    message: "Email to use for Let's Encrypt certificates".magenta,
+    default: "dev@caffeina.com",
+    when: q => q.LETSENCRYPT_ENABLED === 1,
+    required: true
+  }, {
+    name: "LETSENCRYPT_HOST",
+    message: "Domain or domains for Let's Encrypt".magenta,
+    default: "domain.com",
+    when: q => q.LETSENCRYPT_ENABLED === 1,
+    required: true
+  }, {
+    name: "REUSE_KEY",
+    message: "Reuse always the first private key when generating certificates?".magenta,
+    default: false,
+    pageSize: 2,
+    type: 'list',
+    choices: [{
+      name: "yes",
+      value: 1
+    }, {
+      name: "no",
+      value: 0
+    }],
+    when: q => q.LETSENCRYPT_ENABLED === 1,
+    required: true
   }]
 }
 
