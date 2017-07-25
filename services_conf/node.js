@@ -63,11 +63,13 @@ module.exports.defaults = {
   dev: {
     VERSION: "7-alpine",
     PORT: "3000",
-    WORKDIR: "/app"
+    WORKDIR: "/app",
+    NODE_ENV: "development"
   },
   prod: {
     VERSION: "7-alpine",
     PORT: "3000",
-    WORKDIR: "/app"
+    WORKDIR: "/app",
+    NODE_ENV: "production"
   }
 }
