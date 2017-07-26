@@ -547,6 +547,8 @@ function processSingle(node, env) {
 		else updated[node][key] = value
 	})
 
+	if (!env.source) return updated
+	
 	updated[node] = _.extend(env.source.defaults ? env.source.defaults[node] : {}, updated[node])
 
 	return updated
@@ -571,7 +573,7 @@ function linker(envs) {
 		envs.forEach((env, index) => {
 			let current = env
 			// continue if there aren't any dependencies for the current service
-			if (!current.source.dependencies) return linked.push(current)
+			if (!current.source || !current.source.dependencies) return linked.push(current)
 
 			// for each dependency of the current object
 			current.source.dependencies.forEach((dep) => {
