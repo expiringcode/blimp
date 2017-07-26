@@ -98,7 +98,7 @@ module.exports.dependencies = [
   { PROJECT_NAME: {main: "PROJECT_NAME"} },
   { APP_ID:       {main: "PROJECT_NAME"} },
 
-  { DB_NAME:      {mysql: "MYSQL_DATABASE"} },
+  { DB_NAME:      {main: "PROJECT_NAME"} },
   { DB_USER:      {mysql: "MYSQL_USER"} },
   { DB_PASS:      {mysql: "MYSQL_PASSWORD"} },
   
