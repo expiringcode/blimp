@@ -22,7 +22,7 @@ function askUserAndPassword(q) {
 }
 
 module.exports.prompt = { // use nested prompt
-  "development": [{
+  "development": [/*{
     validate: (input) => {
       return /^[a-zA-Z\s\-]+$/.test(input) || 
         'Name must be only letters or dashes'.red
@@ -30,7 +30,7 @@ module.exports.prompt = { // use nested prompt
     name: "MYSQL_DATABASE",
     message: "Database name".magenta,
     required: true
-  },{
+  },*/{
     type: 'list',
     name: 'GEN_UP',
     message: "Generate a random username and password?".magenta,
@@ -85,7 +85,7 @@ module.exports.prompt = { // use nested prompt
     }],
     when: false
   }],
-  "production": [{
+  "production": [/*{
     validate: (input) => {
       return /^[a-zA-Z\s\-]+$/.test(input) || 
         'Name must be only letters, spaces, or dashes'.red
@@ -93,7 +93,7 @@ module.exports.prompt = { // use nested prompt
     name: "MYSQL_DATABASE",
     message: "Database name".magenta,
     required: true
-  },{
+  },*/{
     type: 'list',
     name: 'GEN_UP',
     message: "Generate a random username and password?".magenta,
@@ -136,6 +136,10 @@ module.exports.map = {
 }
 
 module.exports.path = "images/mysql/db"
+
+module.exports.dependencies = [
+  { MYSQL_DATABASE: {main: "PROJECT_NAME"} }
+]
 
 module.exports.defaults = {
   dev: {
