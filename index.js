@@ -128,6 +128,19 @@ function projectRepo() {
 	else return null
 }
 
+function containerIdFromName(name) {
+	return new Promise((resolve, reject) => {
+		let cmd = ["docker", "ps", "-q", "-f", `name=${projectBranch()}${projectName()}_${name}`]
+		exec(cmd, _.extend(execOpts, {sync: true}), (err, stdout, stderr) => {
+			if (err) return reject(err, stderr)
+			process.stdout.write(`\nLooking for ${projectBranch()}${projectName()}_${name}\n`.blue)
+			log(false, stdout, stderr)
+
+			resolve(stdout.toString().split("\n")[0])
+		})
+	})
+}
+
 function filesMap(itemPath, stat) {
     return {
         path: itemPath,
@@ -427,8 +440,11 @@ function getin(service) {
 	})
 
 	if (service == "mysql") service = "db"
-	
-	exec([`docker`, `exec`, `-it`, `${service}_${projectName()}.${projectBranch()}`, `sh`], _.extend(execOpts, {sync: false}), log)
+	containerIdFromName(service)
+	.then((container_id) => {
+		exec([`docker`, `exec`, `-it`, `${container_id}`, `sh`], _.extend(execOpts, {sync: false}), log)
+	})
+	.catch(log)
 }
 
 ////////////
@@ -443,16 +459,20 @@ function exportService(service, tag) {
 	fs.createDirSync(`${CWD}/dist`)
 
 	if (service == "mysql") service = "db"
+	
+	containerIdFromName(service)
+	.then( (id) => {
+		let cmd = [
+			"docker", 
+			"save", 
+			"-o", 
+			`${CWD}/dist/${id}.tar`, 
+			`${id}:${tag}`
+		]
 
-	let cmd = [
-		"docker", 
-		"save", 
-		"-o", 
-		`${CWD}/dist/${service}_${projectName()}.${projectBranch()}.tar`, 
-		`${service}_${projectName()}.${projectBranch()}:${tag}`
-	]
-
-	exec(cmd, _.extend(execOpts, {sync: false}), log)
+		exec(cmd, _.extend(execOpts, {sync: false}), log)
+	})
+	.catch(log)
 }
 
 //////////
@@ -465,11 +485,18 @@ function loadService(service) {
 	process.stdout.write(`Loading ${service} in ${CWD}/dist \n`.green)
 
 	if (service == "mysql") service = "db"
-	if (!fs.existsSync(`${CWD}/dist/${service}_${projectName()}.${projectBranch()}.tar`)) return log(null, null, `Image doesn't seem to exist in ./dist/ \n`.red)
+	containerIdFromName(service)
+	.then( () => {
+		if (!fs.existsSync(`${CWD}/dist/${id}.tar`)) {
+			log(null, null, `Image doesn't seem to exist in ./dist/ \n`.red)
+			return false
+		}
 
-	let cmd = ["docker", "load", "-i", `${CWD}/dist/${service}_${projectName()}.${projectBranch()}.tar`]
+		let cmd = ["docker", "load", "-i", `${CWD}/dist/${id}.tar`]
 
-	exec(cmd, _.extend(execOpts, {sync: false}), log)
+		exec(cmd, _.extend(execOpts, {sync: false}), log)
+	})
+	.catch(log)
 }
 
 ///////////

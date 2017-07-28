@@ -22,7 +22,7 @@ module.exports.prompt = [{
   required: false,
   message: "Project name + branch".magenta,
   when: q => {
-    q.COMPOSE_PROJECT_NAME = q.PROJECT_NAME.toLowerCase() + "_" + q.GIT_BRANCH.toLowerCase()
+    q.COMPOSE_PROJECT_NAME = q.GIT_BRANCH.toLowerCase() + q.PROJECT_NAME.toLowerCase()
     return false
   }
 }]
