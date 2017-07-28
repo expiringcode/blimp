@@ -1,6 +1,6 @@
 {
   "name": "blimpair",
-  "version": "1.0.5-beta",
+  "version": "1.0.6-beta",
   "description": "Docker web framework initializer",
   "main": "index.js",
   "repository": {
