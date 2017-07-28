@@ -64,12 +64,20 @@ module.exports.defaults = {
     VERSION: "7-alpine",
     PORT: "3000",
     WORKDIR: "/app",
-    NODE_ENV: "development"
+    NODE_ENV: "development",
+    DB_HOST: "mysql"
   },
   prod: {
     VERSION: "7-alpine",
     PORT: "3000",
     WORKDIR: "/app",
-    NODE_ENV: "production"
+    NODE_ENV: "production",
+    DB_HOST: "mysql"
   }
 }
+
+module.exports.dependencies = [
+  { DB_NAME:      {main: "PROJECT_NAME"} },
+  { DB_USER:      {mysql: "MYSQL_USER"} },
+  { DB_PASS:      {mysql: "MYSQL_PASSWORD"} }
+]

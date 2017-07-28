@@ -16,11 +16,21 @@ module.exports.prompt = [{
   default: 'master',
   name: "GIT_BRANCH",
   message: "Project branch".magenta
+}, {
+  default: process.cwd().split("/").pop(),
+  name: "COMPOSE_PROJECT_NAME",
+  required: false,
+  message: "Project name + branch".magenta,
+  when: q => {
+    q.COMPOSE_PROJECT_NAME = q.PROJECT_NAME.toLowerCase() + "_" + q.GIT_BRANCH.toLowerCase()
+    return false
+  }
 }]
 
 module.exports.map = {
   DB_PORT: "DB_PORT",
-  PROJECT_NAME: ["COMPOSE_PROJECT_NAME", "PROJECT_NAME"],
+  PROJECT_NAME: "PROJECT_NAME",
+  COMPOSE_PROJECT_NAME: "COMPOSE_PROJECT_NAME",
   GIT_BRANCH: "GIT_BRANCH",
   VERSION: "VERSION"
 }
