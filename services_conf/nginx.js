@@ -62,12 +62,16 @@ module.exports.defaults = {
   dev: {
     TZ: "Europe/Rome",
     ENVIRONMENT: "DEVELOPMENT",
-    WORKDIR: "/www"
+    WORKDIR: "/www",
+    VIRTUAL_PROTO: "https",
+    VIRTUAL_PORT: "443"
   },
   prod: {
     TZ: "Europe/Rome",
     ENVIRONMENT: "PRODUCTION",
-    WORKDIR: "/www"
+    WORKDIR: "/www",
+    VIRTUAL_PROTO: "https",
+    VIRTUAL_PORT: "443"
   }
 }
 
