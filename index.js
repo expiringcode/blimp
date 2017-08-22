@@ -344,6 +344,13 @@ function build(type) {
 		return
 	}
 
+	// Override .env.sample COMPOSE_PROJECT_NAME
+	try {
+		env(`${CWD}/.env`, {overwrite: true})
+	} catch(e) {
+		process.env.COMPOSE_PROJECT_NAME = `${projectBranch()}${projectName()}`
+	}
+
 	var cmd = ["docker-compose", "-f", "yml/docker-compose.yml", "--project-name", projectName()]
 	if (type == "dev") {
 		cmd = cmd.concat(["-f", "yml/docker-compose.dev.yml"]) //, "--remove-orphans"
@@ -402,7 +409,7 @@ function loadBalancer() {
 		process.stdout.write("Showing all networks: \n".yellow)
 		process.stdout.write(stdout.blue)
 		
-		if (stdout.indexOf("loadbalancer") != -1) {
+		if (stdout.indexOf("tier_1") != -1) {
 			process.stdout.write("Network already exists".green)
 		} else {
 			exec(["docker-compose", "up", "-d", "--build"], _.extend(execOpts, {sync: false, cwd: `${CWD}/network`}), log)

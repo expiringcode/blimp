@@ -41,8 +41,7 @@ module.exports.prompt = { // use nested prompt
     }, {
       name: "no",
       value: false
-    }],
-    when: (q) => !(q.GEN_UP = true)
+    }]
   },{
     validate: (input) => { 
       return /^[a-zA-Z\s\-]+$/.test(input) ||
@@ -105,8 +104,7 @@ module.exports.prompt = { // use nested prompt
     }, {
       name: "no",
       value: false
-    }],
-    when: (q) => !(q.GEN_UP = true)
+    }]
   },{
     validate: (input) => { 
       return /^[a-zA-Z\s\-]+$/.test(input) ||
