@@ -351,7 +351,7 @@ function build(type) {
 		process.env.COMPOSE_PROJECT_NAME = `${projectBranch()}${projectName()}`
 	}
 
-	var cmd = ["docker-compose", "-f", "yml/docker-compose.yml", "--project-name", projectName()]
+	var cmd = ["docker-compose", "-f", "yml/docker-compose.yml"]
 	if (type == "dev") {
 		cmd = cmd.concat(["-f", "yml/docker-compose.dev.yml"]) //, "--remove-orphans"
 	}
