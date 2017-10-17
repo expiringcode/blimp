@@ -60,7 +60,7 @@ module.exports.defaults = {
     WP_USE_THEMES: "false",     // Defaults
     WP_LANG: "it_IT",           // Defaults
     WORKDIR: "/www",
-    DEVELOPMENT: 1,             // Defaults
+    DEVELOPMENT: "1",             // Defaults
 
     DB_HOST: "mysql",
     DB_NAME: "",          // Match with MySQL
@@ -81,7 +81,7 @@ module.exports.defaults = {
     WP_USE_THEMES: "false",     // Defaults
     WP_LANG: "it_IT",           // Defaults
     WORKDIR: "/www",
-    DEVELOPMENT: 0,             // Defaults
+    DEVELOPMENT: "0",             // Defaults
 
     DB_HOST: "mysql",
     DB_NAME: "",          // Match with MySQL
