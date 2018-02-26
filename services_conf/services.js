@@ -10,9 +10,6 @@ module.exports.prompt = [{
       name: "Php 5",
       value: "legacy"
     }, {
-      name: "Php Alpine",
-      value: "phpa"
-    }, {
       name: "HHVM",
       value: "hhvm"
     }, {
@@ -48,6 +45,9 @@ module.exports.prompt = [{
     }, {
       name: "Email Server",
       value: "mailer"
+    }, {
+      name: "Registry",
+      value: "registry"
     }, {
       name: "LDAP Server",
       value: "ldapserver"

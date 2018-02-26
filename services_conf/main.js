@@ -13,6 +13,10 @@ module.exports.prompt = [{
   name: "VERSION",
   message: "Version of the project".magenta
 }, {
+  default: 'registry.progress44.com',
+  name: "REGISTRY",
+  message: "Docker registry address".magenta
+}, {
   default: 'master',
   name: "GIT_BRANCH",
   message: "Project branch".magenta
@@ -32,7 +36,8 @@ module.exports.map = {
   PROJECT_NAME: "PROJECT_NAME",
   COMPOSE_PROJECT_NAME: "COMPOSE_PROJECT_NAME",
   GIT_BRANCH: "GIT_BRANCH",
-  VERSION: "VERSION"
+  VERSION: "VERSION",
+  REGISTRY: "REGISTRY"
 }
 
 module.exports.path = ""
